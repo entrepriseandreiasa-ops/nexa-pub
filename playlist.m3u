@@ -1,4 +1,7 @@
 #EXTM3U
-#EXTINF:-1 tvg-name="NEXA PUB TESTE" group-title="NEXA PUB",NEXA PUB TESTE
+#EXTINF:-1 tvg-name="NEXA PUB COMPLETO" group-title="NEXA PUB",NEXA PUB COMPLETO
 https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8
-#EXTINF:-1 group-title="NEXA PUB",NEXA PUB 02
+#EXTINF:-1 tvg-name="NEXA PUB PUBLICIDADE" group-title="NEXA PUB",NEXA PUB PUBLICIDADE
+https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8
+#EXTINF:-1 tvg-name="NEXA PUB MENU" group-title="NEXA PUB",NEXA PUB MENU
+https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8
