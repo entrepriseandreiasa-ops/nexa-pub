@@ -46,7 +46,7 @@ function receber(d){
    el.append(linha);
  });
  if(!el.children.length)el.textContent="Sem produtos disponíveis";
- if(d.rodape)document.getElementById("rodape").textContent=typeof d.rodape==="string"?d.rodape:JSON.stringify(d.rodape);
+ if(d.rodape)document.getElementById("rodape").textContent=typeof d.rodape==="string"?d.rodape:d.rodape.filter(x => String(x.ativo || "").toUpperCase() === "SIM").map(x => x.texto).join("     •     ");
 }
 function atualizar(){
  const s=document.createElement("script");
