@@ -36,358 +36,483 @@ body.modo-menu #direita{width:100%}
 </style>
 </head>
 <body>
+
 <div id="ecra">
-<section id="publicidade"><div id="video-container"></div></section>
-<section id="direita"></section>
+  <section id="publicidade">
+    <div id="video-container"></div>
+  </section>
+  <section id="direita"></section>
 </div>
-<div id="rodape"><div id="texto-rodape"></div></div>
+
+<div id="rodape">
+  <div id="texto-rodape"></div>
+</div>
 
 <script>
 const API="https://script.google.com/macros/s/AKfycbyUpVKN2nepSUrtBXq8DbiAJYQ3N2BbdJdJaODxq6L_ku0j_36tVIKTtcijtSYdzoR9/exec";
 
-const canal=new URLSearchParams(location.search).get("canal")||"completo";
+const canal=(new URLSearchParams(location.search).get("canal")||"completo").toLowerCase();
+
 if(canal==="publicidade")document.body.classList.add("modo-publicidade");
 if(canal==="menu")document.body.classList.add("modo-menu");
 
 let dados={produtos:[],rodape:[],publicidade:[],ecraDireito:[]};
-let assinaturaRodape="",assinaturaDireita="",assinaturaPublicidade="";
-let paginas=[],indicePagina=0,temporizadorPagina=null;
-let indiceAnuncio=0,videoAtual="",playerYouTube=null;
-let youtubePronto=false,youtubeScript=false,aguardaYoutube=false;
+let assinaturaRodape="";
+let assinaturaPaginas="";
+let assinaturaPrecos="";
+let assinaturaPublicidade="";
+
+let paginas=[];
+let indicePagina=0;
+let inicioPagina=0;
+let temporizadorPagina=null;
+
+let indiceAnuncio=0;
+let videoAtual="";
+let playerYouTube=null;
+let youtubePronto=false;
+let youtubeScript=false;
+let aguardaYoutube=false;
 let pedidoEmCurso=false;
 
 function moeda(v){
- if(v===null||v===undefined||v==="")return "";
- const n=Number(v);
- return Number.isFinite(n)?n.toLocaleString("pt-PT",{style:"currency",currency:"EUR"}):"";
+  if(v===null||v===undefined||v==="")return "";
+  const n=Number(v);
+  return Number.isFinite(n)
+    ?n.toLocaleString("pt-PT",{style:"currency",currency:"EUR"})
+    :"";
 }
 
 function urlSegura(url){
- try{
-  const u=new URL(url,location.href);
-  return ["http:","https:"].includes(u.protocol)?u.href:"";
- }catch{return ""}
+  try{
+    const u=new URL(url,location.href);
+    return ["http:","https:"].includes(u.protocol)?u.href:"";
+  }catch{return ""}
 }
 
 function carregarDados(){
- if(pedidoEmCurso)return;
- pedidoEmCurso=true;
- const nome="nexa_"+Date.now()+"_"+Math.random().toString(36).slice(2);
- const script=document.createElement("script");
- let terminado=false;
- const limite=setTimeout(limpar,12000);
+  if(pedidoEmCurso)return;
+  pedidoEmCurso=true;
 
- function limpar(){
-  if(terminado)return;
-  terminado=true;
-  clearTimeout(limite);
-  script.remove();
-  delete window[nome];
-  pedidoEmCurso=false;
- }
+  const nome="nexa_"+Date.now()+"_"+Math.random().toString(36).slice(2);
+  const script=document.createElement("script");
+  let terminado=false;
+  const limite=setTimeout(limpar,15000);
 
- window[nome]=function(resposta){
-  limpar();
-  if(!resposta||typeof resposta!=="object")return;
-  dados={
-   produtos:Array.isArray(resposta.produtos)?resposta.produtos:[],
-   rodape:Array.isArray(resposta.rodape)?resposta.rodape:[],
-   publicidade:Array.isArray(resposta.publicidade)?resposta.publicidade:[],
-   ecraDireito:Array.isArray(resposta.ecraDireito)?resposta.ecraDireito:[]
+  function limpar(){
+    if(terminado)return;
+    terminado=true;
+    clearTimeout(limite);
+    script.remove();
+    delete window[nome];
+    pedidoEmCurso=false;
+  }
+
+  window[nome]=function(resposta){
+    limpar();
+    if(!resposta||typeof resposta!=="object")return;
+
+    dados={
+      produtos:Array.isArray(resposta.produtos)?resposta.produtos:[],
+      rodape:Array.isArray(resposta.rodape)?resposta.rodape:[],
+      publicidade:Array.isArray(resposta.publicidade)?resposta.publicidade:[],
+      ecraDireito:Array.isArray(resposta.ecraDireito)?resposta.ecraDireito:[]
+    };
+
+    atualizarRodape();
+    atualizarDireita();
+    atualizarPublicidade();
   };
-  atualizarRodape();
-  atualizarDireita();
-  atualizarPublicidade();
- };
- script.onerror=limpar;
- script.src=API+"?callback="+nome+"&t="+Date.now();
- document.head.appendChild(script);
+
+  script.onerror=limpar;
+  script.src=API+"?callback="+encodeURIComponent(nome)+"&t="+Date.now();
+  document.head.appendChild(script);
 }
 
 function atualizarRodape(){
- const textos=dados.rodape.map(x=>String(x.texto||"").trim()).filter(Boolean);
- const assinatura=JSON.stringify(textos);
- if(assinatura===assinaturaRodape)return;
- assinaturaRodape=assinatura;
- const el=document.getElementById("texto-rodape");
- el.textContent=textos.join("     ★     ");
- el.style.animation="none";
- void el.offsetWidth;
- el.style.animation="";
+  const textos=dados.rodape.map(x=>String(x.texto||"").trim()).filter(Boolean);
+  const assinatura=JSON.stringify(textos);
+
+  if(assinatura===assinaturaRodape)return;
+  assinaturaRodape=assinatura;
+
+  const el=document.getElementById("texto-rodape");
+  el.textContent=textos.join("     ★     ");
+  el.style.animation="none";
+  void el.offsetWidth;
+  el.style.animation="";
+}
+
+function duracaoSegundos(v){
+  const n=Number(v);
+  return Number.isFinite(n)&&n>0?n:30;
 }
 
 function criarPaginas(){
- const linhas=[...dados.ecraDireito].sort((a,b)=>Number(a.ordem)-Number(b.ordem));
- const resultado=[];
- let grupo=[];
+  const linhas=[...dados.ecraDireito]
+    .sort((a,b)=>Number(a.ordem)-Number(b.ordem));
 
- function fecharGrupo(){
-  if(!grupo.length)return;
-  resultado.push({
-   tipo:"4 PRODUTOS",
-   produtos:grupo,
-   duracao:Math.max(1,Number(grupo[0].duracao)||30)
-  });
-  grupo=[];
- }
+  const resultado=[];
+  let grupo=[];
 
- for(const item of linhas){
-  const tipo=String(item.tipo||"").trim().toUpperCase();
-  if(tipo==="4 PRODUTOS"){
-   grupo.push(item);
-   if(grupo.length===4)fecharGrupo();
-   continue;
+  function fecharGrupo(){
+    if(!grupo.length)return;
+
+    resultado.push({
+      tipo:"4 PRODUTOS",
+      produtos:[...grupo],
+      duracao:duracaoSegundos(grupo[0].duracao)
+    });
+
+    grupo=[];
   }
+
+  for(const item of linhas){
+    const tipo=String(item.tipo||"").trim().toUpperCase();
+
+    if(tipo==="4 PRODUTOS"){
+      grupo.push(item);
+      if(grupo.length===4)fecharGrupo();
+      continue;
+    }
+
+    fecharGrupo();
+
+    if(tipo==="PREÇOS"){
+      resultado.push({
+        tipo:"PREÇOS",
+        duracao:duracaoSegundos(item.duracao)
+      });
+    }
+
+    if(tipo==="IMAGEM"&&item.urlImagem){
+      resultado.push({
+        tipo:"IMAGEM",
+        urlImagem:item.urlImagem,
+        duracao:duracaoSegundos(item.duracao)
+      });
+    }
+  }
+
   fecharGrupo();
-  if(tipo==="PREÇOS"){
-   resultado.push({tipo:"PREÇOS",duracao:Math.max(1,Number(item.duracao)||30)});
+
+  if(!resultado.length){
+    resultado.push({tipo:"PREÇOS",duracao:30});
   }
-  if(tipo==="IMAGEM"&&item.urlImagem){
-   resultado.push({
-    tipo:"IMAGEM",
-    urlImagem:item.urlImagem,
-    duracao:Math.max(1,Number(item.duracao)||30)
-   });
-  }
- }
- fecharGrupo();
- if(!resultado.length)resultado.push({tipo:"PREÇOS",duracao:30});
- return resultado;
+
+  return resultado;
 }
 
 function atualizarDireita(){
- const assinatura=JSON.stringify({produtos:dados.produtos,ecraDireito:dados.ecraDireito});
- if(assinatura===assinaturaDireita)return;
- assinaturaDireita=assinatura;
+  const novasPaginas=criarPaginas();
+  const novaAssinatura=JSON.stringify(novasPaginas);
+  const novosPrecos=JSON.stringify(dados.produtos);
 
- const anterior=paginas[indicePagina]?.tipo;
- paginas=criarPaginas();
- const encontrado=paginas.findIndex(p=>p.tipo===anterior);
- indicePagina=encontrado>=0?encontrado:0;
- mostrarPagina();
+  const mudouEstrutura=novaAssinatura!==assinaturaPaginas;
+  const mudaramPrecos=novosPrecos!==assinaturaPrecos;
+
+  assinaturaPrecos=novosPrecos;
+
+  if(mudouEstrutura){
+    assinaturaPaginas=novaAssinatura;
+    paginas=novasPaginas;
+
+    if(indicePagina>=paginas.length)indicePagina=0;
+
+    // Mantém o tempo decorrido quando apenas muda o conteúdo.
+    if(!inicioPagina)inicioPagina=Date.now();
+
+    mostrarPagina(false);
+    return;
+  }
+
+  // Atualiza os preços sem reiniciar o temporizador.
+  if(mudaramPrecos&&paginas[indicePagina]?.tipo==="PREÇOS"){
+    mostrarPrecos(document.getElementById("direita"));
+  }
 }
 
-function mostrarPagina(){
- clearTimeout(temporizadorPagina);
- if(!paginas.length)return;
- const p=paginas[indicePagina];
- const el=document.getElementById("direita");
+function mostrarPagina(novaPagina=true){
+  clearTimeout(temporizadorPagina);
+  if(!paginas.length)return;
 
- if(p.tipo==="PREÇOS")mostrarPrecos(el);
- if(p.tipo==="4 PRODUTOS")mostrarQuatro(el,p.produtos);
- if(p.tipo==="IMAGEM")mostrarImagem(el,p.urlImagem);
+  if(novaPagina||!inicioPagina)inicioPagina=Date.now();
 
- if(paginas.length>1){
+  const pagina=paginas[indicePagina];
+  const el=document.getElementById("direita");
+
+  if(pagina.tipo==="PREÇOS")mostrarPrecos(el);
+  if(pagina.tipo==="4 PRODUTOS")mostrarQuatro(el,pagina.produtos);
+  if(pagina.tipo==="IMAGEM")mostrarImagem(el,pagina.urlImagem);
+
+  if(paginas.length<2)return;
+
+  const duracao=pagina.duracao*1000;
+  const decorrido=Date.now()-inicioPagina;
+  const restante=Math.max(0,duracao-decorrido);
+
   temporizadorPagina=setTimeout(()=>{
-   indicePagina=(indicePagina+1)%paginas.length;
-   mostrarPagina();
-  },p.duracao*1000);
- }
+    indicePagina=(indicePagina+1)%paginas.length;
+    mostrarPagina(true);
+  },restante);
 }
 
 function mostrarPrecos(el){
- el.replaceChildren();
- const pagina=document.createElement("div");
- pagina.className="pagina";
- const titulo=document.createElement("div");
- titulo.className="titulo";
- titulo.textContent="MENU";
- pagina.appendChild(titulo);
+  el.replaceChildren();
 
- const categorias=new Map();
- for(const p of dados.produtos){
-  const cat=p.categoria||"OUTROS";
-  if(!categorias.has(cat))categorias.set(cat,[]);
-  categorias.get(cat).push(p);
- }
- for(const [cat,produtos] of categorias){
-  const h=document.createElement("div");
-  h.className="categoria";
-  h.textContent=cat;
-  pagina.appendChild(h);
-  for(const p of produtos){
-   const linha=document.createElement("div");
-   linha.className="produto-linha";
-   const nome=document.createElement("span");
-   nome.textContent=p.produto;
-   const preco=document.createElement("span");
-   preco.className="preco";
-   preco.textContent=moeda(p.preco);
-   linha.append(nome,preco);
-   pagina.appendChild(linha);
+  const pagina=document.createElement("div");
+  pagina.className="pagina";
+
+  const titulo=document.createElement("div");
+  titulo.className="titulo";
+  titulo.textContent="MENU";
+  pagina.appendChild(titulo);
+
+  const categorias=new Map();
+
+  for(const p of dados.produtos){
+    const categoria=p.categoria||"OUTROS";
+    if(!categorias.has(categoria))categorias.set(categoria,[]);
+    categorias.get(categoria).push(p);
   }
- }
- el.appendChild(pagina);
+
+  for(const [categoria,produtos] of categorias){
+    const h=document.createElement("div");
+    h.className="categoria";
+    h.textContent=categoria;
+    pagina.appendChild(h);
+
+    for(const p of produtos){
+      const linha=document.createElement("div");
+      linha.className="produto-linha";
+
+      const nome=document.createElement("span");
+      nome.textContent=p.produto;
+
+      const preco=document.createElement("span");
+      preco.className="preco";
+      preco.textContent=moeda(p.preco);
+
+      linha.append(nome,preco);
+      pagina.appendChild(linha);
+    }
+  }
+
+  el.appendChild(pagina);
 }
 
 function mostrarQuatro(el,produtos){
- el.replaceChildren();
- const pagina=document.createElement("div");
- pagina.className="pagina";
- const grelha=document.createElement("div");
- grelha.className="grelha";
- for(const p of produtos){
-  const cartao=document.createElement("div");
-  cartao.className="cartao";
-  const img=document.createElement("img");
-  img.src=urlSegura(p.urlImagem);
-  img.alt=p.nome||"Produto";
-  const info=document.createElement("div");
-  info.className="cartao-info";
-  const nome=document.createElement("div");
-  nome.className="cartao-nome";
-  nome.textContent=p.nome||"";
-  const preco=document.createElement("div");
-  preco.className="cartao-preco";
-  preco.textContent=moeda(p.preco);
-  info.append(nome,preco);
-  cartao.append(img,info);
-  grelha.appendChild(cartao);
- }
- pagina.appendChild(grelha);
- el.appendChild(pagina);
+  el.replaceChildren();
+
+  const pagina=document.createElement("div");
+  pagina.className="pagina";
+
+  const grelha=document.createElement("div");
+  grelha.className="grelha";
+
+  for(const p of produtos){
+    const cartao=document.createElement("div");
+    cartao.className="cartao";
+
+    const img=document.createElement("img");
+    img.src=urlSegura(p.urlImagem);
+    img.alt=p.nome||"Produto";
+
+    const info=document.createElement("div");
+    info.className="cartao-info";
+
+    const nome=document.createElement("div");
+    nome.className="cartao-nome";
+    nome.textContent=p.nome||"";
+
+    const preco=document.createElement("div");
+    preco.className="cartao-preco";
+    preco.textContent=moeda(p.preco);
+
+    info.append(nome,preco);
+    cartao.append(img,info);
+    grelha.appendChild(cartao);
+  }
+
+  pagina.appendChild(grelha);
+  el.appendChild(pagina);
 }
 
 function mostrarImagem(el,url){
- el.replaceChildren();
- const pagina=document.createElement("div");
- pagina.className="pagina";
- const img=document.createElement("img");
- img.className="imagem-completa";
- img.src=urlSegura(url);
- img.alt="Menu";
- pagina.appendChild(img);
- el.appendChild(pagina);
+  el.replaceChildren();
+
+  const pagina=document.createElement("div");
+  pagina.className="pagina";
+
+  const img=document.createElement("img");
+  img.className="imagem-completa";
+  img.src=urlSegura(url);
+  img.alt="Menu";
+
+  pagina.appendChild(img);
+  el.appendChild(pagina);
 }
 
 function youtubeId(url){
- try{
-  const u=new URL(url);
-  const host=u.hostname.replace(/^www\./,"");
-  if(host==="youtu.be")return u.pathname.split("/")[1]||"";
-  if(["youtube.com","m.youtube.com","youtube-nocookie.com"].includes(host)){
-   if(u.pathname==="/watch")return u.searchParams.get("v")||"";
-   const partes=u.pathname.split("/");
-   if(["embed","shorts","live"].includes(partes[1]))return partes[2]||"";
-  }
- }catch{}
- return "";
+  try{
+    const u=new URL(url);
+    const host=u.hostname.replace(/^www\./,"");
+
+    if(host==="youtu.be")return u.pathname.split("/")[1]||"";
+
+    if(["youtube.com","m.youtube.com","youtube-nocookie.com"].includes(host)){
+      if(u.pathname==="/watch")return u.searchParams.get("v")||"";
+      const partes=u.pathname.split("/");
+      if(["embed","shorts","live"].includes(partes[1]))return partes[2]||"";
+    }
+  }catch{}
+
+  return "";
 }
 
 function anuncios(){
- return dados.publicidade.filter(x=>urlSegura(x.urlVideo));
+  return dados.publicidade.filter(x=>urlSegura(x.urlVideo));
 }
 
 function atualizarPublicidade(){
- const lista=anuncios();
- const assinatura=JSON.stringify(lista);
- if(assinatura===assinaturaPublicidade)return;
- assinaturaPublicidade=assinatura;
+  const lista=anuncios();
+  const assinatura=JSON.stringify(lista);
 
- if(!lista.length){
-  destruirPlayer();
-  videoAtual="";
-  document.getElementById("video-container").replaceChildren();
-  return;
- }
- const indice=lista.findIndex(x=>x.urlVideo===videoAtual);
- if(indice>=0){indiceAnuncio=indice;return}
- indiceAnuncio=0;
- mostrarAnuncio();
+  if(assinatura===assinaturaPublicidade)return;
+  assinaturaPublicidade=assinatura;
+
+  if(!lista.length){
+    destruirPlayer();
+    videoAtual="";
+    document.getElementById("video-container").replaceChildren();
+    return;
+  }
+
+  const indice=lista.findIndex(x=>x.urlVideo===videoAtual);
+
+  if(indice>=0){
+    indiceAnuncio=indice;
+    return;
+  }
+
+  indiceAnuncio=0;
+  mostrarAnuncio();
 }
 
 function destruirPlayer(){
- if(playerYouTube){
-  try{playerYouTube.destroy()}catch{}
- }
- playerYouTube=null;
+  if(playerYouTube){
+    try{playerYouTube.destroy()}catch{}
+  }
+  playerYouTube=null;
 }
 
 function proximoAnuncio(){
- const lista=anuncios();
- if(!lista.length)return;
- indiceAnuncio=(indiceAnuncio+1)%lista.length;
- mostrarAnuncio();
+  const lista=anuncios();
+  if(!lista.length)return;
+
+  indiceAnuncio=(indiceAnuncio+1)%lista.length;
+  mostrarAnuncio();
 }
 
 function mostrarAnuncio(){
- const lista=anuncios();
- if(!lista.length)return;
- const url=urlSegura(lista[indiceAnuncio].urlVideo);
- if(!url)return;
+  const lista=anuncios();
+  if(!lista.length)return;
 
- destruirPlayer();
- videoAtual=url;
- const container=document.getElementById("video-container");
- container.replaceChildren();
- const id=youtubeId(url);
+  const url=urlSegura(lista[indiceAnuncio].urlVideo);
+  if(!url)return;
 
- if(id){
-  const alvo=document.createElement("div");
-  alvo.id="youtube-player";
-  container.appendChild(alvo);
-  if(youtubePronto&&window.YT?.Player)iniciarYoutube(id);
-  else{
-   aguardaYoutube=true;
-   carregarYoutube();
+  destruirPlayer();
+  videoAtual=url;
+
+  const container=document.getElementById("video-container");
+  container.replaceChildren();
+
+  const id=youtubeId(url);
+
+  if(id){
+    const alvo=document.createElement("div");
+    alvo.id="youtube-player";
+    container.appendChild(alvo);
+
+    if(youtubePronto&&window.YT?.Player){
+      iniciarYoutube(id);
+    }else{
+      aguardaYoutube=true;
+      carregarYoutube();
+    }
+    return;
   }
-  return;
- }
 
- const video=document.createElement("video");
- video.src=url;
- video.autoplay=true;
- video.muted=true;
- video.playsInline=true;
- video.addEventListener("ended",()=>{
-  if(anuncios().length===1){
-   video.currentTime=0;
-   video.play().catch(()=>{});
-  }else proximoAnuncio();
- });
- container.appendChild(video);
- video.play().catch(()=>{});
+  const video=document.createElement("video");
+  video.src=url;
+  video.autoplay=true;
+  video.muted=true;
+  video.playsInline=true;
+
+  video.addEventListener("ended",()=>{
+    if(anuncios().length===1){
+      video.currentTime=0;
+      video.play().catch(()=>{});
+    }else{
+      proximoAnuncio();
+    }
+  });
+
+  container.appendChild(video);
+  video.play().catch(()=>{});
 }
 
 function carregarYoutube(){
- if(youtubeScript)return;
- youtubeScript=true;
- const s=document.createElement("script");
- s.src="https://www.youtube.com/iframe_api";
- document.head.appendChild(s);
+  if(youtubeScript)return;
+  youtubeScript=true;
+
+  const s=document.createElement("script");
+  s.src="https://www.youtube.com/iframe_api";
+  document.head.appendChild(s);
 }
 
 window.onYouTubeIframeAPIReady=function(){
- youtubePronto=true;
- if(aguardaYoutube){
-  aguardaYoutube=false;
-  const id=youtubeId(videoAtual);
-  if(id)iniciarYoutube(id);
- }
+  youtubePronto=true;
+
+  if(aguardaYoutube){
+    aguardaYoutube=false;
+    const id=youtubeId(videoAtual);
+    if(id)iniciarYoutube(id);
+  }
 };
 
 function iniciarYoutube(id){
- if(!window.YT?.Player)return;
- playerYouTube=new YT.Player("youtube-player",{
-  videoId:id,
-  width:"100%",
-  height:"100%",
-  playerVars:{
-   autoplay:1,mute:1,controls:0,playsinline:1,rel:0,
-   origin:location.origin
-  },
-  events:{
-   onReady:e=>{e.target.mute();e.target.playVideo()},
-   onStateChange:e=>{
-    if(e.data===YT.PlayerState.ENDED){
-     if(anuncios().length===1){
-      e.target.seekTo(0);
-      e.target.playVideo();
-     }else proximoAnuncio();
+  if(!window.YT?.Player)return;
+
+  playerYouTube=new YT.Player("youtube-player",{
+    videoId:id,
+    width:"100%",
+    height:"100%",
+    playerVars:{
+      autoplay:1,
+      mute:1,
+      controls:0,
+      playsinline:1,
+      rel:0,
+      origin:location.origin
+    },
+    events:{
+      onReady:e=>{
+        e.target.mute();
+        e.target.playVideo();
+      },
+      onStateChange:e=>{
+        if(e.data===YT.PlayerState.ENDED){
+          if(anuncios().length===1){
+            e.target.seekTo(0);
+            e.target.playVideo();
+          }else{
+            proximoAnuncio();
+          }
+        }
+      }
     }
-   }
-  }
- });
+  });
 }
 
 carregarDados();
