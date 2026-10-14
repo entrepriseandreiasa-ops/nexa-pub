@@ -195,10 +195,6 @@ body.modo-publicidade #rodape {
   display: none;
 }
 
-body.modo-menu #ecra {
-  height: calc(100dvh - 55px);
-}
-
 body.modo-menu #publicidade {
   display: none;
 }
@@ -259,8 +255,11 @@ let videoAtual = "";
 let apiYouTubePronta = false;
 let aguardandoYouTube = false;
 
+let pedidoEmCurso = false;
+
 const moeda = valor => {
   const numero = Number(valor);
+
   return Number.isFinite(numero)
     ? numero.toLocaleString("pt-PT", {
         style: "currency",
@@ -269,18 +268,10 @@ const moeda = valor => {
     : "";
 };
 
-function escapar(texto) {
-  return String(texto ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}
-
 function urlSegura(url) {
   try {
     const u = new URL(url, location.href);
+
     return ["http:", "https:"].includes(u.protocol)
       ? u.href
       : "";
@@ -290,21 +281,33 @@ function urlSegura(url) {
 }
 
 function carregarDados() {
+  if (pedidoEmCurso) return;
+
+  pedidoEmCurso = true;
+
   const nomeCallback =
     "nexaCallback_" + Date.now() + "_" +
     Math.random().toString(36).slice(2);
 
   const script = document.createElement("script");
+  let terminado = false;
 
-  const limpeza = () => {
+  const timeout = setTimeout(() => {
+    limpar();
+  }, 15000);
+
+  function limpar() {
+    if (terminado) return;
+
+    terminado = true;
+    clearTimeout(timeout);
     script.remove();
-    try {
-      delete window[nomeCallback];
-    } catch {}
-  };
+    delete window[nomeCallback];
+    pedidoEmCurso = false;
+  }
 
   window[nomeCallback] = resposta => {
-    limpeza();
+    limpar();
 
     if (!resposta || typeof resposta !== "object") {
       return;
@@ -326,16 +329,14 @@ function carregarDados() {
     atualizarPublicidade();
   };
 
-  script.onerror = limpeza;
-  script.src = API +
+  script.onerror = limpar;
+
+  script.src =
+    API +
     "?callback=" + encodeURIComponent(nomeCallback) +
     "&t=" + Date.now();
 
   document.head.appendChild(script);
-
-  setTimeout(() => {
-    if (window[nomeCallback]) limpeza();
-  }, 20000);
 }
 
 function atualizarRodape() {
@@ -350,6 +351,7 @@ function atualizarRodape() {
   assinaturaRodape = assinatura;
 
   const elemento = document.getElementById("texto-rodape");
+
   elemento.textContent = textos.join("     ★     ");
 
   elemento.style.animation = "none";
@@ -428,8 +430,19 @@ function atualizarDireita() {
   if (assinatura === assinaturaDireita) return;
 
   assinaturaDireita = assinatura;
+
+  const paginaAnterior = paginas[indicePagina];
+  const tipoAnterior = paginaAnterior?.tipo;
+
   paginas = criarPaginas();
-  indicePagina = 0;
+
+  const indiceMesmoTipo = paginas.findIndex(
+    pagina => pagina.tipo === tipoAnterior
+  );
+
+  indicePagina = indiceMesmoTipo >= 0
+    ? indiceMesmoTipo
+    : 0;
 
   mostrarPagina();
 }
@@ -536,6 +549,7 @@ function mostrarQuatroProdutos(elemento, produtos) {
 
     const preco = document.createElement("div");
     preco.className = "cartao-preco";
+
     preco.textContent =
       produto.preco === null || produto.preco === ""
         ? ""
@@ -598,11 +612,14 @@ function extrairYoutube(url) {
   return "";
 }
 
-function atualizarPublicidade() {
-  const anuncios = dados.publicidade.filter(
+function anunciosValidos() {
+  return dados.publicidade.filter(
     item => urlSegura(item.urlVideo)
   );
+}
 
+function atualizarPublicidade() {
+  const anuncios = anunciosValidos();
   const assinatura = JSON.stringify(anuncios);
 
   if (assinatura === assinaturaPublicidade) return;
@@ -616,14 +633,12 @@ function atualizarPublicidade() {
     return;
   }
 
-  const atualExiste = anuncios.some(
+  const indiceAtual = anuncios.findIndex(
     item => item.urlVideo === videoAtual
   );
 
-  if (atualExiste) {
-    indiceAnuncio = anuncios.findIndex(
-      item => item.urlVideo === videoAtual
-    );
+  if (indiceAtual >= 0) {
+    indiceAnuncio = indiceAtual;
     return;
   }
 
@@ -642,9 +657,7 @@ function destruirPlayer() {
 }
 
 function proximoAnuncio() {
-  const anuncios = dados.publicidade.filter(
-    item => urlSegura(item.urlVideo)
-  );
+  const anuncios = anunciosValidos();
 
   if (!anuncios.length) return;
 
@@ -653,9 +666,7 @@ function proximoAnuncio() {
 }
 
 function mostrarAnuncio() {
-  const anuncios = dados.publicidade.filter(
-    item => urlSegura(item.urlVideo)
-  );
+  const anuncios = anunciosValidos();
 
   if (!anuncios.length) return;
 
@@ -663,8 +674,6 @@ function mostrarAnuncio() {
   const url = urlSegura(anuncio.urlVideo);
 
   if (!url) return;
-
-  if (url === videoAtual && playerYouTube) return;
 
   destruirPlayer();
   videoAtual = url;
@@ -696,9 +705,15 @@ function mostrarAnuncio() {
   video.playsInline = true;
   video.controls = false;
 
-  video.addEventListener("ended", proximoAnuncio);
-  video.addEventListener("error", () => {
-    if (anuncios.length > 1) proximoAnuncio();
+  video.addEventListener("ended", () => {
+    const lista = anunciosValidos();
+
+    if (lista.length === 1) {
+      video.currentTime = 0;
+      video.play().catch(() => {});
+    } else {
+      proximoAnuncio();
+    }
   });
 
   container.appendChild(video);
@@ -722,7 +737,9 @@ window.onYouTubeIframeAPIReady = function() {
 
   if (aguardandoYouTube) {
     aguardandoYouTube = false;
+
     const id = extrairYoutube(videoAtual);
+
     if (id) iniciarYoutube(id);
   }
 };
@@ -749,9 +766,7 @@ function iniciarYoutube(id) {
       },
       onStateChange: evento => {
         if (evento.data === YT.PlayerState.ENDED) {
-          const anuncios = dados.publicidade.filter(
-            item => urlSegura(item.urlVideo)
-          );
+          const anuncios = anunciosValidos();
 
           if (anuncios.length === 1) {
             evento.target.seekTo(0);
@@ -766,7 +781,10 @@ function iniciarYoutube(id) {
 }
 
 carregarDados();
-setInterval(carregarDados, 60000);
+
+// Consulta automaticamente o Google Sheets a cada 5 segundos.
+// Não recarrega a página nem reinicia o vídeo.
+setInterval(carregarDados, 5000);
 </script>
 
 </body>
