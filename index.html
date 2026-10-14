@@ -1,0 +1,61 @@
+
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NEXA PUB — AUTHÊNTICA</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#111;color:white;font-family:Arial,sans-serif;overflow:hidden}
+main{display:flex;height:calc(100vh - 65px)}
+#pub{width:38%;background:#181818;display:flex;align-items:center;justify-content:center;text-align:center;font-size:3vw}
+#menu{width:62%;padding:2vw;overflow:hidden}
+h1{color:#ffd400;margin:0 0 20px;font-size:3vw}
+.produto{display:flex;justify-content:space-between;border-bottom:1px solid #444;padding:8px 0;font-size:1.5vw}
+.preco{color:#ffd400;white-space:nowrap;margin-left:15px}
+footer{height:65px;background:#ffd400;color:black;display:flex;align-items:center;overflow:hidden;font-size:26px;font-weight:bold}
+#rodape{white-space:nowrap;animation:scroll 22s linear infinite}
+@keyframes scroll{from{transform:translateX(100vw)}to{transform:translateX(-100%)}}
+</style>
+</head>
+<body>
+<main>
+<section id="pub">NEXA PUB<br>PUBLICIDADE</section>
+<section id="menu">
+<h1>AUTHÊNTICA — MENU</h1>
+<div id="produtos">A carregar menu...</div>
+</section>
+</main>
+<footer><div id="rodape">Bem-vindo à AUTHÊNTICA</div></footer>
+<script>
+const API="https://script.google.com/macros/s/AKfycbzg93sm7ajA6bo2nKhDrUzbqtttcYiAMYg2r8EIML8JK0rfuRSlGQzUkBrDqEzeLLzk/exec";
+function receber(d){
+ const lista=d.produtos||[];
+ const el=document.getElementById("produtos");
+ el.replaceChildren();
+ lista.filter(p=>String(p.mostrar||p.mostrarNoMenu||"SIM").toUpperCase()!=="NÃO").forEach(p=>{
+   const linha=document.createElement("div");
+   linha.className="produto";
+   const nome=document.createElement("span");
+   nome.textContent=p.produto||p.nome||"";
+   const preco=document.createElement("span");
+   preco.className="preco";
+   preco.textContent=p.preco||p.preço||"";
+   linha.append(nome,preco);
+   el.append(linha);
+ });
+ if(!el.children.length)el.textContent="Sem produtos disponíveis";
+ if(d.rodape)document.getElementById("rodape").textContent=typeof d.rodape==="string"?d.rodape:JSON.stringify(d.rodape);
+}
+function atualizar(){
+ const s=document.createElement("script");
+ s.src=API+"?callback=receber&t="+Date.now();
+ document.body.appendChild(s);
+ s.onload=()=>s.remove();
+}
+atualizar();
+setInterval(atualizar,60000);
+</script>
+</body>
+</html>
