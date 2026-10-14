@@ -5,213 +5,42 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NEXA PUB — AUTHENTICA</title>
-
 <style>
-* {
-  box-sizing: border-box;
-}
-
-html, body {
-  margin: 0;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  background: #080808;
-  color: white;
-  font-family: Arial, Helvetica, sans-serif;
-}
-
-#ecra {
-  display: flex;
-  width: 100vw;
-  height: calc(100dvh - 55px);
-}
-
-#publicidade {
-  width: 38%;
-  height: 100%;
-  background: #000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  position: relative;
-}
-
-#video-container {
-  width: 100%;
-  max-height: 100%;
-  aspect-ratio: 16 / 9;
-  position: relative;
-  overflow: hidden;
-}
-
-#video-container iframe,
-#video-container video {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  border: none;
-  object-fit: contain;
-}
-
-#direita {
-  width: 62%;
-  height: 100%;
-  background: #111;
-  overflow: hidden;
-  position: relative;
-}
-
-.pagina {
-  width: 100%;
-  height: 100%;
-  padding: 25px;
-  overflow: hidden;
-}
-
-.titulo {
-  color: #ffd400;
-  text-align: center;
-  font-size: clamp(24px, 2.5vw, 48px);
-  font-weight: bold;
-  margin-bottom: 20px;
-  text-transform: uppercase;
-}
-
-.categoria {
-  font-size: clamp(19px, 1.8vw, 32px);
-  color: #ffd400;
-  font-weight: bold;
-  margin-top: 17px;
-  margin-bottom: 8px;
-  border-bottom: 1px solid #555;
-  padding-bottom: 6px;
-}
-
-.produto-linha {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 15px;
-  padding: 7px 0;
-  font-size: clamp(16px, 1.55vw, 30px);
-}
-
-.produto-linha .preco {
-  color: #ffd400;
-  font-weight: bold;
-  white-space: nowrap;
-}
-
-.grelha {
-  height: 100%;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: 1fr 1fr;
-  gap: 16px;
-}
-
-.cartao {
-  background: #202020;
-  border-radius: 12px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  min-height: 0;
-}
-
-.cartao img {
-  width: 100%;
-  flex: 1;
-  min-height: 0;
-  object-fit: contain;
-  background: #000;
-}
-
-.cartao-info {
-  padding: 12px;
-  text-align: center;
-}
-
-.cartao-nome {
-  font-size: clamp(17px, 1.8vw, 32px);
-  font-weight: bold;
-}
-
-.cartao-preco {
-  color: #ffd400;
-  font-size: clamp(20px, 2.1vw, 38px);
-  font-weight: bold;
-  margin-top: 5px;
-}
-
-.imagem-completa {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-
-#rodape {
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  width: 100%;
-  height: 55px;
-  background: #ffd400;
-  color: #000;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  white-space: nowrap;
-  z-index: 20;
-}
-
-#texto-rodape {
-  display: inline-block;
-  padding-left: 100vw;
-  font-size: 27px;
-  font-weight: bold;
-  animation: deslocar 35s linear infinite;
-}
-
-@keyframes deslocar {
-  from { transform: translateX(0); }
-  to { transform: translateX(-100%); }
-}
-
-body.modo-publicidade #ecra {
-  height: 100dvh;
-}
-
-body.modo-publicidade #publicidade {
-  width: 100%;
-}
-
-body.modo-publicidade #direita,
-body.modo-publicidade #rodape {
-  display: none;
-}
-
-body.modo-menu #publicidade {
-  display: none;
-}
-
-body.modo-menu #direita {
-  width: 100%;
-}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#080808;color:#fff;font-family:Arial,Helvetica,sans-serif}
+#ecra{display:flex;width:100vw;height:calc(100dvh - 55px)}
+#publicidade{width:38%;height:100%;background:#000;display:flex;align-items:center;justify-content:center;overflow:hidden}
+#video-container{width:100%;max-height:100%;aspect-ratio:16/9;position:relative}
+#video-container iframe,#video-container video{position:absolute;inset:0;width:100%;height:100%;border:0;object-fit:contain}
+#direita{width:62%;height:100%;background:#111;overflow:hidden}
+.pagina{width:100%;height:100%;padding:25px;overflow:hidden}
+.titulo{color:#ffd400;text-align:center;font-size:clamp(24px,2.5vw,48px);font-weight:bold;margin-bottom:20px;text-transform:uppercase}
+.categoria{font-size:clamp(19px,1.8vw,32px);color:#ffd400;font-weight:bold;margin-top:17px;margin-bottom:8px;border-bottom:1px solid #555;padding-bottom:6px}
+.produto-linha{display:flex;justify-content:space-between;align-items:baseline;gap:15px;padding:7px 0;font-size:clamp(16px,1.55vw,30px)}
+.preco{color:#ffd400;font-weight:bold;white-space:nowrap}
+.grelha{height:100%;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:16px}
+.cartao{background:#202020;border-radius:12px;overflow:hidden;display:flex;flex-direction:column;min-width:0;min-height:0}
+.cartao img{width:100%;flex:1;min-height:0;object-fit:contain;background:#000}
+.cartao-info{padding:12px;text-align:center}
+.cartao-nome{font-size:clamp(17px,1.8vw,32px);font-weight:bold}
+.cartao-preco{color:#ffd400;font-size:clamp(20px,2.1vw,38px);font-weight:bold;margin-top:5px}
+.imagem-completa{width:100%;height:100%;object-fit:contain}
+#rodape{position:absolute;left:0;bottom:0;width:100%;height:55px;background:#ffd400;color:#000;overflow:hidden;display:flex;align-items:center;white-space:nowrap;z-index:20}
+#texto-rodape{display:inline-block;padding-left:100vw;font-size:27px;font-weight:bold;animation:deslocar 35s linear infinite}
+@keyframes deslocar{from{transform:translateX(0)}to{transform:translateX(-100%)}}
+body.modo-publicidade #ecra{height:100dvh}
+body.modo-publicidade #publicidade{width:100%}
+body.modo-publicidade #direita,body.modo-publicidade #rodape{display:none}
+body.modo-menu #publicidade{display:none}
+body.modo-menu #direita{width:100%}
 </style>
 </head>
-
 <body>
 
 <div id="ecra">
   <section id="publicidade">
     <div id="video-container"></div>
   </section>
-
   <section id="direita"></section>
 </div>
 
@@ -220,108 +49,72 @@ body.modo-menu #direita {
 </div>
 
 <script>
-const API =
-  "https://script.google.com/macros/s/AKfycbzyAt7FSfuDGViIbeqHTmEF0YHCgm6-iru2-O6WBXqOy6-hBoodIGOvq4kJ9DIx3s3a/exec";
+const API = "https://script.google.com/macros/s/AKfycbwZiA4tI06xXKsOpFjT05U8E_0kjgGloHI5wpEOl6fFnqAOTKAZXZvMMl0x_wHQaFPJ/exec";
 
 const parametros = new URLSearchParams(location.search);
 const canal = (parametros.get("canal") || "completo").toLowerCase();
 
-if (canal === "publicidade") {
-  document.body.classList.add("modo-publicidade");
-}
+if(canal==="publicidade") document.body.classList.add("modo-publicidade");
+if(canal==="menu") document.body.classList.add("modo-menu");
 
-if (canal === "menu") {
-  document.body.classList.add("modo-menu");
-}
+let dados={produtos:[],rodape:[],publicidade:[],ecraDireito:[]};
+let assinaturaDireita="";
+let assinaturaRodape="";
+let assinaturaPublicidade="";
+let paginas=[];
+let indicePagina=0;
+let temporizadorPagina=null;
+let indiceAnuncio=0;
+let playerYouTube=null;
+let videoAtual="";
+let apiYouTubePronta=false;
+let aguardandoYouTube=false;
+let pedidoEmCurso=false;
+let scriptYoutubeAdicionado=false;
 
-let dados = {
-  produtos: [],
-  rodape: [],
-  publicidade: [],
-  ecraDireito: []
-};
-
-let assinaturaDireita = "";
-let assinaturaRodape = "";
-let assinaturaPublicidade = "";
-
-let paginas = [];
-let indicePagina = 0;
-let temporizadorPagina = null;
-
-let indiceAnuncio = 0;
-let playerYouTube = null;
-let videoAtual = "";
-let apiYouTubePronta = false;
-let aguardandoYouTube = false;
-
-let pedidoEmCurso = false;
-
-const moeda = valor => {
-  const numero = Number(valor);
-
-  return Number.isFinite(numero)
-    ? numero.toLocaleString("pt-PT", {
-        style: "currency",
-        currency: "EUR"
-      })
+function moeda(valor){
+  if(valor===null || valor===undefined || valor==="") return "";
+  const n=Number(valor);
+  return Number.isFinite(n)
+    ? n.toLocaleString("pt-PT",{style:"currency",currency:"EUR"})
     : "";
-};
-
-function urlSegura(url) {
-  try {
-    const u = new URL(url, location.href);
-
-    return ["http:", "https:"].includes(u.protocol)
-      ? u.href
-      : "";
-  } catch {
-    return "";
-  }
 }
 
-function carregarDados() {
-  if (pedidoEmCurso) return;
+function urlSegura(url){
+  try{
+    const u=new URL(url,location.href);
+    return ["http:","https:"].includes(u.protocol)?u.href:"";
+  }catch{return ""}
+}
 
-  pedidoEmCurso = true;
+function carregarDados(){
+  if(pedidoEmCurso)return;
+  pedidoEmCurso=true;
 
-  const nomeCallback =
-    "nexaCallback_" + Date.now() + "_" +
-    Math.random().toString(36).slice(2);
+  const nomeCallback="nexaCallback_"+Date.now()+"_"+Math.random().toString(36).slice(2);
+  const script=document.createElement("script");
+  let terminado=false;
 
-  const script = document.createElement("script");
-  let terminado = false;
+  const timeout=setTimeout(limpar,15000);
 
-  const timeout = setTimeout(() => {
-    limpar();
-  }, 15000);
-
-  function limpar() {
-    if (terminado) return;
-
-    terminado = true;
+  function limpar(){
+    if(terminado)return;
+    terminado=true;
     clearTimeout(timeout);
     script.remove();
     delete window[nomeCallback];
-    pedidoEmCurso = false;
+    pedidoEmCurso=false;
   }
 
-  window[nomeCallback] = resposta => {
+  window[nomeCallback]=function(resposta){
     limpar();
+    if(!resposta || typeof resposta!=="object")return;
 
-    if (!resposta || typeof resposta !== "object") {
-      return;
-    }
-
-    dados = {
-      produtos: Array.isArray(resposta.produtos)
-        ? resposta.produtos : [],
-      rodape: Array.isArray(resposta.rodape)
-        ? resposta.rodape : [],
-      publicidade: Array.isArray(resposta.publicidade)
-        ? resposta.publicidade : [],
-      ecraDireito: Array.isArray(resposta.ecraDireito)
-        ? resposta.ecraDireito : []
+    dados={
+      produtos:Array.isArray(resposta.produtos)?resposta.produtos:[],
+      rodape:Array.isArray(resposta.rodape)?resposta.rodape:[],
+      publicidade:Array.isArray(resposta.publicidade)?resposta.publicidade:[],
+      ecraDireito:Array.isArray(resposta.ecraDireito)?resposta.ecraDireito:[]
     };
 
     atualizarRodape();
@@ -329,193 +122,143 @@ function carregarDados() {
     atualizarPublicidade();
   };
 
-  script.onerror = limpar;
-
-  script.src =
-    API +
-    "?callback=" + encodeURIComponent(nomeCallback) +
-    "&t=" + Date.now();
-
+  script.onerror=limpar;
+  script.src=API+"?callback="+encodeURIComponent(nomeCallback)+"&t="+Date.now();
   document.head.appendChild(script);
 }
 
-function atualizarRodape() {
-  const textos = dados.rodape
-    .map(item => String(item.texto || "").trim())
-    .filter(Boolean);
+function atualizarRodape(){
+  const textos=dados.rodape.map(x=>String(x.texto||"").trim()).filter(Boolean);
+  const assinatura=JSON.stringify(textos);
+  if(assinatura===assinaturaRodape)return;
+  assinaturaRodape=assinatura;
 
-  const assinatura = JSON.stringify(textos);
-
-  if (assinatura === assinaturaRodape) return;
-
-  assinaturaRodape = assinatura;
-
-  const elemento = document.getElementById("texto-rodape");
-
-  elemento.textContent = textos.join("     ★     ");
-
-  elemento.style.animation = "none";
-  void elemento.offsetWidth;
-  elemento.style.animation = "";
+  const el=document.getElementById("texto-rodape");
+  el.textContent=textos.join("     ★     ");
+  el.style.animation="none";
+  void el.offsetWidth;
+  el.style.animation="";
 }
 
-function criarPaginas() {
-  const configuracoes = [...dados.ecraDireito]
-    .sort((a, b) => Number(a.ordem) - Number(b.ordem));
+function criarPaginas(){
+  const configuracoes=[...dados.ecraDireito].sort((a,b)=>Number(a.ordem)-Number(b.ordem));
+  const resultado=[];
+  let grupo=[];
 
-  const resultado = [];
-  let grupo = [];
-
-  function fecharGrupo() {
-    if (!grupo.length) return;
-
+  function fecharGrupo(){
+    if(!grupo.length)return;
     resultado.push({
-      tipo: "4 PRODUTOS",
-      produtos: grupo,
-      duracao: Number(grupo[0].duracao) || 30
+      tipo:"4 PRODUTOS",
+      produtos:grupo,
+      duracao:Number(grupo[0].duracao)||30
     });
-
-    grupo = [];
+    grupo=[];
   }
 
-  for (const item of configuracoes) {
-    const tipo = String(item.tipo || "").toUpperCase();
+  for(const item of configuracoes){
+    const tipo=String(item.tipo||"").trim().toUpperCase();
 
-    if (tipo === "4 PRODUTOS") {
+    if(tipo==="4 PRODUTOS"){
       grupo.push(item);
-
-      if (grupo.length === 4) {
-        fecharGrupo();
-      }
-
+      if(grupo.length===4)fecharGrupo();
       continue;
     }
 
     fecharGrupo();
 
-    if (tipo === "PREÇOS") {
-      resultado.push({
-        tipo: "PREÇOS",
-        duracao: Number(item.duracao) || 30
-      });
+    if(tipo==="PREÇOS"){
+      resultado.push({tipo:"PREÇOS",duracao:Number(item.duracao)||30});
     }
 
-    if (tipo === "IMAGEM" && item.urlImagem) {
+    if(tipo==="IMAGEM" && item.urlImagem){
       resultado.push({
-        tipo: "IMAGEM",
-        urlImagem: item.urlImagem,
-        duracao: Number(item.duracao) || 30
+        tipo:"IMAGEM",
+        urlImagem:item.urlImagem,
+        duracao:Number(item.duracao)||30
       });
     }
   }
 
   fecharGrupo();
 
-  if (!resultado.length) {
-    resultado.push({
-      tipo: "PREÇOS",
-      duracao: 30
-    });
-  }
-
+  if(!resultado.length)resultado.push({tipo:"PREÇOS",duracao:30});
   return resultado;
 }
 
-function atualizarDireita() {
-  const assinatura = JSON.stringify({
-    produtos: dados.produtos,
-    ecraDireito: dados.ecraDireito
+function atualizarDireita(){
+  const assinatura=JSON.stringify({
+    produtos:dados.produtos,
+    ecraDireito:dados.ecraDireito
   });
 
-  if (assinatura === assinaturaDireita) return;
+  if(assinatura===assinaturaDireita)return;
+  assinaturaDireita=assinatura;
 
-  assinaturaDireita = assinatura;
+  const tipoAnterior=paginas[indicePagina]?.tipo;
+  paginas=criarPaginas();
 
-  const paginaAnterior = paginas[indicePagina];
-  const tipoAnterior = paginaAnterior?.tipo;
-
-  paginas = criarPaginas();
-
-  const indiceMesmoTipo = paginas.findIndex(
-    pagina => pagina.tipo === tipoAnterior
-  );
-
-  indicePagina = indiceMesmoTipo >= 0
-    ? indiceMesmoTipo
-    : 0;
+  const indice=paginas.findIndex(p=>p.tipo===tipoAnterior);
+  indicePagina=indice>=0?indice:0;
 
   mostrarPagina();
 }
 
-function mostrarPagina() {
+function mostrarPagina(){
   clearTimeout(temporizadorPagina);
+  if(!paginas.length)return;
 
-  if (!paginas.length) return;
+  const pagina=paginas[indicePagina];
+  const direita=document.getElementById("direita");
 
-  const pagina = paginas[indicePagina];
-  const direita = document.getElementById("direita");
+  if(pagina.tipo==="PREÇOS")mostrarPrecos(direita);
+  if(pagina.tipo==="4 PRODUTOS")mostrarQuatroProdutos(direita,pagina.produtos);
+  if(pagina.tipo==="IMAGEM")mostrarImagem(direita,pagina.urlImagem);
 
-  if (pagina.tipo === "PREÇOS") {
-    mostrarPrecos(direita);
-  }
-
-  if (pagina.tipo === "4 PRODUTOS") {
-    mostrarQuatroProdutos(direita, pagina.produtos);
-  }
-
-  if (pagina.tipo === "IMAGEM") {
-    mostrarImagem(direita, pagina.urlImagem);
-  }
-
-  if (paginas.length > 1) {
-    temporizadorPagina = setTimeout(() => {
-      indicePagina = (indicePagina + 1) % paginas.length;
+  if(paginas.length>1){
+    temporizadorPagina=setTimeout(()=>{
+      indicePagina=(indicePagina+1)%paginas.length;
       mostrarPagina();
-    }, Math.max(1, Number(pagina.duracao) || 30) * 1000);
+    },Math.max(1,Number(pagina.duracao)||30)*1000);
   }
 }
 
-function mostrarPrecos(elemento) {
+function mostrarPrecos(elemento){
   elemento.replaceChildren();
 
-  const pagina = document.createElement("div");
-  pagina.className = "pagina";
+  const pagina=document.createElement("div");
+  pagina.className="pagina";
 
-  const titulo = document.createElement("div");
-  titulo.className = "titulo";
-  titulo.textContent = "MENU";
+  const titulo=document.createElement("div");
+  titulo.className="titulo";
+  titulo.textContent="MENU";
   pagina.appendChild(titulo);
 
-  const categorias = new Map();
+  const categorias=new Map();
 
-  for (const produto of dados.produtos) {
-    const categoria = produto.categoria || "OUTROS";
-
-    if (!categorias.has(categoria)) {
-      categorias.set(categoria, []);
-    }
-
+  for(const produto of dados.produtos){
+    const categoria=produto.categoria||"OUTROS";
+    if(!categorias.has(categoria))categorias.set(categoria,[]);
     categorias.get(categoria).push(produto);
   }
 
-  for (const [categoria, produtos] of categorias) {
-    const cabecalho = document.createElement("div");
-    cabecalho.className = "categoria";
-    cabecalho.textContent = categoria;
+  for(const [categoria,produtos] of categorias){
+    const cabecalho=document.createElement("div");
+    cabecalho.className="categoria";
+    cabecalho.textContent=categoria;
     pagina.appendChild(cabecalho);
 
-    for (const produto of produtos) {
-      const linha = document.createElement("div");
-      linha.className = "produto-linha";
+    for(const produto of produtos){
+      const linha=document.createElement("div");
+      linha.className="produto-linha";
 
-      const nome = document.createElement("span");
-      nome.textContent = produto.produto;
+      const nome=document.createElement("span");
+      nome.textContent=produto.produto;
 
-      const preco = document.createElement("span");
-      preco.className = "preco";
-      preco.textContent = moeda(produto.preco);
+      const preco=document.createElement("span");
+      preco.className="preco";
+      preco.textContent=moeda(produto.preco);
 
-      linha.append(nome, preco);
+      linha.append(nome,preco);
       pagina.appendChild(linha);
     }
   }
@@ -523,40 +266,36 @@ function mostrarPrecos(elemento) {
   elemento.appendChild(pagina);
 }
 
-function mostrarQuatroProdutos(elemento, produtos) {
+function mostrarQuatroProdutos(elemento,produtos){
   elemento.replaceChildren();
 
-  const pagina = document.createElement("div");
-  pagina.className = "pagina";
+  const pagina=document.createElement("div");
+  pagina.className="pagina";
 
-  const grelha = document.createElement("div");
-  grelha.className = "grelha";
+  const grelha=document.createElement("div");
+  grelha.className="grelha";
 
-  for (const produto of produtos) {
-    const cartao = document.createElement("div");
-    cartao.className = "cartao";
+  for(const produto of produtos){
+    const cartao=document.createElement("div");
+    cartao.className="cartao";
 
-    const imagem = document.createElement("img");
-    imagem.src = urlSegura(produto.urlImagem) || "";
-    imagem.alt = produto.nome || "Produto";
+    const imagem=document.createElement("img");
+    imagem.src=urlSegura(produto.urlImagem)||"";
+    imagem.alt=produto.nome||"Produto";
 
-    const info = document.createElement("div");
-    info.className = "cartao-info";
+    const info=document.createElement("div");
+    info.className="cartao-info";
 
-    const nome = document.createElement("div");
-    nome.className = "cartao-nome";
-    nome.textContent = produto.nome || "";
+    const nome=document.createElement("div");
+    nome.className="cartao-nome";
+    nome.textContent=produto.nome||"";
 
-    const preco = document.createElement("div");
-    preco.className = "cartao-preco";
+    const preco=document.createElement("div");
+    preco.className="cartao-preco";
+    preco.textContent=moeda(produto.preco);
 
-    preco.textContent =
-      produto.preco === null || produto.preco === ""
-        ? ""
-        : moeda(produto.preco);
-
-    info.append(nome, preco);
-    cartao.append(imagem, info);
+    info.append(nome,preco);
+    cartao.append(imagem,info);
     grelha.appendChild(cartao);
   }
 
@@ -564,214 +303,176 @@ function mostrarQuatroProdutos(elemento, produtos) {
   elemento.appendChild(pagina);
 }
 
-function mostrarImagem(elemento, url) {
+function mostrarImagem(elemento,url){
   elemento.replaceChildren();
 
-  const pagina = document.createElement("div");
-  pagina.className = "pagina";
+  const pagina=document.createElement("div");
+  pagina.className="pagina";
 
-  const imagem = document.createElement("img");
-  imagem.className = "imagem-completa";
-  imagem.src = urlSegura(url) || "";
-  imagem.alt = "Menu";
+  const imagem=document.createElement("img");
+  imagem.className="imagem-completa";
+  imagem.src=urlSegura(url)||"";
+  imagem.alt="Menu";
 
   pagina.appendChild(imagem);
   elemento.appendChild(pagina);
 }
 
-function extrairYoutube(url) {
-  try {
-    const u = new URL(url);
-    const host = u.hostname.replace(/^www\./, "");
+function extrairYoutube(url){
+  try{
+    const u=new URL(url);
+    const host=u.hostname.replace(/^www\./,"");
 
-    if (host === "youtu.be") {
-      return u.pathname.split("/")[1] || "";
+    if(host==="youtu.be")return u.pathname.split("/")[1]||"";
+
+    if(["youtube.com","m.youtube.com","youtube-nocookie.com"].includes(host)){
+      if(u.pathname==="/watch")return u.searchParams.get("v")||"";
+      const partes=u.pathname.split("/");
+      if(["embed","shorts","live"].includes(partes[1]))return partes[2]||"";
     }
-
-    if (
-      host === "youtube.com" ||
-      host === "m.youtube.com" ||
-      host === "youtube-nocookie.com"
-    ) {
-      if (u.pathname === "/watch") {
-        return u.searchParams.get("v") || "";
-      }
-
-      const partes = u.pathname.split("/");
-
-      if (
-        partes[1] === "embed" ||
-        partes[1] === "shorts" ||
-        partes[1] === "live"
-      ) {
-        return partes[2] || "";
-      }
-    }
-  } catch {}
-
+  }catch{}
   return "";
 }
 
-function anunciosValidos() {
-  return dados.publicidade.filter(
-    item => urlSegura(item.urlVideo)
-  );
+function anunciosValidos(){
+  return dados.publicidade.filter(item=>urlSegura(item.urlVideo));
 }
 
-function atualizarPublicidade() {
-  const anuncios = anunciosValidos();
-  const assinatura = JSON.stringify(anuncios);
+function atualizarPublicidade(){
+  const anuncios=anunciosValidos();
+  const assinatura=JSON.stringify(anuncios);
+  if(assinatura===assinaturaPublicidade)return;
 
-  if (assinatura === assinaturaPublicidade) return;
+  assinaturaPublicidade=assinatura;
 
-  assinaturaPublicidade = assinatura;
-
-  if (!anuncios.length) {
+  if(!anuncios.length){
     destruirPlayer();
-    videoAtual = "";
+    videoAtual="";
     document.getElementById("video-container").replaceChildren();
     return;
   }
 
-  const indiceAtual = anuncios.findIndex(
-    item => item.urlVideo === videoAtual
-  );
+  const indice=anuncios.findIndex(item=>item.urlVideo===videoAtual);
 
-  if (indiceAtual >= 0) {
-    indiceAnuncio = indiceAtual;
+  if(indice>=0){
+    indiceAnuncio=indice;
     return;
   }
 
-  indiceAnuncio = 0;
+  indiceAnuncio=0;
   mostrarAnuncio();
 }
 
-function destruirPlayer() {
-  if (playerYouTube) {
-    try {
-      playerYouTube.destroy();
-    } catch {}
+function destruirPlayer(){
+  if(playerYouTube){
+    try{playerYouTube.destroy()}catch{}
   }
-
-  playerYouTube = null;
+  playerYouTube=null;
 }
 
-function proximoAnuncio() {
-  const anuncios = anunciosValidos();
+function proximoAnuncio(){
+  const anuncios=anunciosValidos();
+  if(!anuncios.length)return;
 
-  if (!anuncios.length) return;
-
-  indiceAnuncio = (indiceAnuncio + 1) % anuncios.length;
+  indiceAnuncio=(indiceAnuncio+1)%anuncios.length;
   mostrarAnuncio();
 }
 
-function mostrarAnuncio() {
-  const anuncios = anunciosValidos();
+function mostrarAnuncio(){
+  const anuncios=anunciosValidos();
+  if(!anuncios.length)return;
 
-  if (!anuncios.length) return;
-
-  const anuncio = anuncios[indiceAnuncio];
-  const url = urlSegura(anuncio.urlVideo);
-
-  if (!url) return;
+  const anuncio=anuncios[indiceAnuncio];
+  const url=urlSegura(anuncio.urlVideo);
+  if(!url)return;
 
   destruirPlayer();
-  videoAtual = url;
+  videoAtual=url;
 
-  const container = document.getElementById("video-container");
+  const container=document.getElementById("video-container");
   container.replaceChildren();
 
-  const youtubeId = extrairYoutube(url);
+  const youtubeId=extrairYoutube(url);
 
-  if (youtubeId) {
-    const alvo = document.createElement("div");
-    alvo.id = "youtube-player";
+  if(youtubeId){
+    const alvo=document.createElement("div");
+    alvo.id="youtube-player";
     container.appendChild(alvo);
 
-    if (apiYouTubePronta && window.YT?.Player) {
+    if(apiYouTubePronta && window.YT?.Player){
       iniciarYoutube(youtubeId);
-    } else {
-      aguardandoYouTube = true;
+    }else{
+      aguardandoYouTube=true;
       carregarApiYoutube();
     }
-
     return;
   }
 
-  const video = document.createElement("video");
-  video.src = url;
-  video.autoplay = true;
-  video.muted = true;
-  video.playsInline = true;
-  video.controls = false;
+  const video=document.createElement("video");
+  video.src=url;
+  video.autoplay=true;
+  video.muted=true;
+  video.playsInline=true;
+  video.controls=false;
 
-  video.addEventListener("ended", () => {
-    const lista = anunciosValidos();
-
-    if (lista.length === 1) {
-      video.currentTime = 0;
-      video.play().catch(() => {});
-    } else {
+  video.addEventListener("ended",()=>{
+    if(anunciosValidos().length===1){
+      video.currentTime=0;
+      video.play().catch(()=>{});
+    }else{
       proximoAnuncio();
     }
   });
 
   container.appendChild(video);
-  video.play().catch(() => {});
+  video.play().catch(()=>{});
 }
 
-let scriptYoutubeAdicionado = false;
+function carregarApiYoutube(){
+  if(scriptYoutubeAdicionado)return;
+  scriptYoutubeAdicionado=true;
 
-function carregarApiYoutube() {
-  if (scriptYoutubeAdicionado) return;
-
-  scriptYoutubeAdicionado = true;
-
-  const script = document.createElement("script");
-  script.src = "https://www.youtube.com/iframe_api";
+  const script=document.createElement("script");
+  script.src="https://www.youtube.com/iframe_api";
   document.head.appendChild(script);
 }
 
-window.onYouTubeIframeAPIReady = function() {
-  apiYouTubePronta = true;
+window.onYouTubeIframeAPIReady=function(){
+  apiYouTubePronta=true;
 
-  if (aguardandoYouTube) {
-    aguardandoYouTube = false;
-
-    const id = extrairYoutube(videoAtual);
-
-    if (id) iniciarYoutube(id);
+  if(aguardandoYouTube){
+    aguardandoYouTube=false;
+    const id=extrairYoutube(videoAtual);
+    if(id)iniciarYoutube(id);
   }
 };
 
-function iniciarYoutube(id) {
-  if (!window.YT?.Player) return;
+function iniciarYoutube(id){
+  if(!window.YT?.Player)return;
 
-  playerYouTube = new YT.Player("youtube-player", {
-    videoId: id,
-    width: "100%",
-    height: "100%",
-    playerVars: {
-      autoplay: 1,
-      mute: 1,
-      controls: 0,
-      playsinline: 1,
-      rel: 0,
-      origin: location.origin
+  playerYouTube=new YT.Player("youtube-player",{
+    videoId:id,
+    width:"100%",
+    height:"100%",
+    playerVars:{
+      autoplay:1,
+      mute:1,
+      controls:0,
+      playsinline:1,
+      rel:0,
+      origin:location.origin
     },
-    events: {
-      onReady: evento => {
+    events:{
+      onReady:evento=>{
         evento.target.mute();
         evento.target.playVideo();
       },
-      onStateChange: evento => {
-        if (evento.data === YT.PlayerState.ENDED) {
-          const anuncios = anunciosValidos();
-
-          if (anuncios.length === 1) {
+      onStateChange:evento=>{
+        if(evento.data===YT.PlayerState.ENDED){
+          if(anunciosValidos().length===1){
             evento.target.seekTo(0);
             evento.target.playVideo();
-          } else {
+          }else{
             proximoAnuncio();
           }
         }
@@ -781,11 +482,7 @@ function iniciarYoutube(id) {
 }
 
 carregarDados();
-
-// Consulta automaticamente o Google Sheets a cada 5 segundos.
-// Não recarrega a página nem reinicia o vídeo.
-setInterval(carregarDados, 5000);
+setInterval(carregarDados,5000);
 </script>
-
 </body>
 </html>
