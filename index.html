@@ -5,88 +5,43 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>NEXA PUB — AUTHÊNTICA</title>
-
 <style>
 *{box-sizing:border-box}
-html,body{
-  margin:0;
-  width:100%;
-  height:100%;
-  overflow:hidden;
-}
-body{
-  background:#111;
-  color:#fff;
-  font-family:Arial,sans-serif;
-}
-main{
-  display:flex;
-  height:calc(100vh - 65px);
-}
+html,body{margin:0;width:100%;height:100%;overflow:hidden}
+body{background:#111;color:#fff;font-family:Arial,sans-serif}
+main{display:flex;height:calc(100vh - 65px)}
 #publicidade{
-  width:38%;
-  background:#191919;
-  position:relative;
-  overflow:hidden;
+  width:38%;background:#191919;
+  position:relative;overflow:hidden
 }
 #anuncio{
-  width:100%;
-  height:100%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  text-align:center;
-  font-size:2.5vw;
+  width:100%;height:100%;
+  display:flex;align-items:center;
+  justify-content:center;text-align:center;
+  font-size:2.5vw
 }
-#anuncio iframe,
-#anuncio video{
-  width:100%;
-  height:100%;
-  border:0;
-  object-fit:contain;
+#anuncio iframe,#anuncio video{
+  width:100%;height:100%;
+  border:0;object-fit:contain
 }
-#menu{
-  width:62%;
-  padding:1.5vw;
-  overflow:hidden;
-}
-h1{
-  color:#ffd400;
-  font-size:2.5vw;
-  margin:0 0 12px;
-}
-#produtos{
-  height:calc(100% - 55px);
-  overflow:hidden;
-}
+#menu{width:62%;padding:1.5vw;overflow:hidden}
+h1{color:#ffd400;font-size:2.5vw;margin:0 0 12px}
+#produtos{height:calc(100% - 55px);overflow:hidden}
 .linha{
-  display:flex;
-  justify-content:space-between;
-  gap:15px;
-  padding:6px 0;
-  border-bottom:1px solid #333;
-  font-size:1.25vw;
+  display:flex;justify-content:space-between;
+  gap:15px;padding:6px 0;
+  border-bottom:1px solid #333;font-size:1.25vw
 }
-.preco{
-  color:#ffd400;
-  font-weight:bold;
-  white-space:nowrap;
-}
+.preco{color:#ffd400;font-weight:bold;white-space:nowrap}
 footer{
-  height:65px;
-  background:#ffd400;
-  color:#000;
-  display:flex;
-  align-items:center;
-  overflow:hidden;
-  font-size:24px;
-  font-weight:bold;
+  height:65px;background:#ffd400;color:#000;
+  display:flex;align-items:center;
+  overflow:hidden;font-size:24px;font-weight:bold
 }
 #rodape{
-  white-space:nowrap;
-  display:inline-block;
+  white-space:nowrap;display:inline-block;
   padding-left:100vw;
-  animation:deslizar 35s linear infinite;
+  animation:deslizar 35s linear infinite
 }
 @keyframes deslizar{
   from{transform:translateX(0)}
@@ -94,12 +49,11 @@ footer{
 }
 </style>
 </head>
-
 <body>
 
 <main>
   <section id="publicidade">
-    <div id="anuncio">NEXA PUB — PUBLICIDADE</div>
+    <div id="anuncio">A carregar publicidade...</div>
   </section>
 
   <section id="menu">
@@ -113,60 +67,18 @@ footer{
 </footer>
 
 <script>
-const API =
-"https://script.google.com/macros/s/AKfycbzg93sm7ajA6bo2nKhDrUzbqtttcYiAMYg2r8EIML8JK0rfuRSlGQzUkBrDqEzeLLzk/exec";
+const API="https://script.google.com/macros/s/AKfycbwijR8z9g_tcbiru_uHKN3BVVxaQocU-lXFI6l9Vvk2JP_rs21EZG0aTakhzka_pIQ/exec";
 
-function texto(v){
-  return String(v ?? "").trim();
-}
+const texto=v=>String(v??"").trim();
+const ativo=v=>["SIM","TRUE","1","YES"].includes(texto(v).toUpperCase());
 
-function ativo(v){
-  return ["SIM","TRUE","1","YES"]
-    .includes(texto(v).toUpperCase());
-}
-
-function normalizarChave(chave){
-  return texto(chave)
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g,"")
-    .toLowerCase()
-    .replace(/[^a-z0-9]/g,"");
-}
-
-function campo(obj,...nomes){
-  if(!obj || typeof obj!=="object") return undefined;
-
-  for(const nome of nomes){
-    if(obj[nome]!==undefined && obj[nome]!==null){
-      return obj[nome];
-    }
-  }
-
-  const entradas=Object.entries(obj);
-
-  for(const nome of nomes){
-    const procurado=normalizarChave(nome);
-    const encontrado=entradas.find(
-      ([chave])=>normalizarChave(chave)===procurado
-    );
-    if(encontrado) return encontrado[1];
-  }
-
-  return undefined;
-}
-
-function formatarPreco(v){
+function preco(v){
   const s=texto(v);
-  if(!s) return "";
-  if(s.includes("€")) return s;
-
+  if(!s)return "";
+  if(s.includes("€"))return s;
   const n=Number(s.replace(",","."));
-
   return Number.isFinite(n)
-    ? n.toLocaleString("pt-PT",{
-        style:"currency",
-        currency:"EUR"
-      })
+    ? n.toLocaleString("pt-PT",{style:"currency",currency:"EUR"})
     : s;
 }
 
@@ -174,21 +86,11 @@ function mostrarProdutos(lista){
   const caixa=document.getElementById("produtos");
   caixa.replaceChildren();
 
-  if(!Array.isArray(lista)) return;
+  (Array.isArray(lista)?lista:[]).forEach(p=>{
+    if(p.mostrar!==undefined&&!ativo(p.mostrar))return;
 
-  lista.forEach(p=>{
-    const visivel=campo(
-      p,"mostrar","mostrarNoMenu",
-      "Mostrar no menu?","ativo"
-    );
-
-    if(visivel!==undefined && !ativo(visivel)) return;
-
-    const nome=texto(campo(
-      p,"produto","nome","Produto"
-    ));
-
-    if(!nome) return;
+    const nome=texto(p.produto);
+    if(!nome)return;
 
     const linha=document.createElement("div");
     linha.className="linha";
@@ -196,14 +98,12 @@ function mostrarProdutos(lista){
     const descricao=document.createElement("span");
     descricao.textContent=nome;
 
-    const preco=document.createElement("span");
-    preco.className="preco";
-    preco.textContent=formatarPreco(campo(
-      p,"preco","preço","Preço (€)"
-    ));
+    const valor=document.createElement("span");
+    valor.className="preco";
+    valor.textContent=preco(p.preco);
 
-    linha.append(descricao,preco);
-    caixa.appendChild(linha);
+    linha.append(descricao,valor);
+    caixa.append(linha);
   });
 
   if(!caixa.children.length){
@@ -212,27 +112,11 @@ function mostrarProdutos(lista){
 }
 
 function mostrarRodape(lista){
-  let mensagens=[];
-
-  if(Array.isArray(lista)){
-    mensagens=lista
-      .filter(item=>{
-        const estado=campo(item,"ativo","Ativo?");
-        return estado===undefined || ativo(estado);
-      })
-      .sort((a,b)=>
-        Number(campo(a,"ordem")??0)-
-        Number(campo(b,"ordem")??0)
-      )
-      .map(item=>texto(campo(
-        item,"texto","mensagem",
-        "Texto do rodapé"
-      )))
-      .filter(Boolean);
-  }
-  else if(typeof lista==="string"){
-    mensagens=[lista];
-  }
+  const mensagens=(Array.isArray(lista)?lista:[])
+    .slice()
+    .sort((a,b)=>Number(a.ordem||0)-Number(b.ordem||0))
+    .map(x=>texto(x.texto))
+    .filter(Boolean);
 
   document.getElementById("rodape").textContent=
     mensagens.length
@@ -245,8 +129,8 @@ function youtubeId(url){
     const u=new URL(url);
     const host=u.hostname.toLowerCase();
 
-    if(host==="youtu.be" || host==="www.youtu.be"){
-      return u.pathname.split("/")[1] || "";
+    if(host==="youtu.be"||host==="www.youtu.be"){
+      return u.pathname.split("/")[1]||"";
     }
 
     if([
@@ -257,18 +141,15 @@ function youtubeId(url){
       "www.youtube-nocookie.com"
     ].includes(host)){
       if(u.pathname==="/watch"){
-        return u.searchParams.get("v") || "";
+        return u.searchParams.get("v")||"";
       }
 
       const partes=u.pathname.split("/");
-
       if(["embed","shorts","live"].includes(partes[1])){
-        return partes[2] || "";
+        return partes[2]||"";
       }
     }
-  }
-  catch(e){}
-
+  }catch(e){}
   return "";
 }
 
@@ -284,102 +165,53 @@ function mostrarAnuncio(){
   caixa.replaceChildren();
 
   if(!anuncios.length){
-    caixa.textContent="NEXA PUB — PUBLICIDADE";
+    caixa.textContent="Sem anúncios ativos";
     return;
   }
 
   const anuncio=anuncios[indice%anuncios.length];
-  const url=texto(anuncio.url);
+  const url=texto(anuncio.urlVideo);
   const id=youtubeId(url);
 
   if(id){
     const iframe=document.createElement("iframe");
-
     iframe.src=
-      "https://www.youtube.com/embed/"+
+      "https://www.youtube-nocookie.com/embed/"+
       encodeURIComponent(id)+
-      "?autoplay=1&mute=1&controls=0"+
-      "&playsinline=1&rel=0"+
+      "?autoplay=1&mute=1&controls=0&playsinline=1"+
       "&loop=1&playlist="+encodeURIComponent(id);
 
-    iframe.allow=
-      "autoplay; encrypted-media; picture-in-picture";
-
-    iframe.referrerPolicy="strict-origin-when-cross-origin";
-    iframe.title=anuncio.nome || "Publicidade";
-
-    caixa.appendChild(iframe);
+    iframe.allow="autoplay; encrypted-media; picture-in-picture";
+    iframe.title=anuncio.nome||"Publicidade";
+    caixa.append(iframe);
   }
   else if(/^https?:\/\//i.test(url)){
     const video=document.createElement("video");
-
     video.src=url;
     video.autoplay=true;
     video.muted=true;
     video.playsInline=true;
     video.loop=true;
-    video.controls=false;
-
-    caixa.appendChild(video);
+    caixa.append(video);
     video.play().catch(()=>{});
   }
   else{
-    caixa.textContent=anuncio.nome || "PUBLICIDADE";
+    caixa.textContent=anuncio.nome||"Publicidade";
   }
+
+  const duracao=Number(anuncio.duracao);
+  const segundos=Number.isFinite(duracao)&&duracao>0?duracao:30;
 
   temporizador=setTimeout(()=>{
     indice=(indice+1)%anuncios.length;
     mostrarAnuncio();
-  },anuncio.duracao*1000);
+  },segundos*1000);
 }
 
 function mostrarPublicidade(lista){
-  if(!Array.isArray(lista)){
-    console.warn(
-      "A resposta do Apps Script não contém uma lista de publicidade.",
-      lista
-    );
-    return;
-  }
-
-  const novos=lista
-    .filter(item=>{
-      const estado=campo(
-        item,"ativo","Ativo?","Ativo"
-      );
-      return estado!==undefined && ativo(estado);
-    })
-    .map(item=>({
-      nome:texto(campo(
-        item,"nome","Nome do anúncio",
-        "anuncio","Anúncio"
-      )),
-      url:texto(campo(
-        item,
-        "url",
-        "urlVideo",
-        "urlDoVideo",
-        "video",
-        "link",
-        "URL do vídeo",
-        "URL vídeo",
-        "Link do vídeo"
-      )),
-      duracao:Number(campo(
-        item,"duracao","Duração (seg)",
-        "Duração","tempo"
-      )??30),
-      ordem:Number(campo(item,"ordem")??0)
-    }))
-    .filter(item=>item.url)
-    .sort((a,b)=>a.ordem-b.ordem)
-    .map(item=>({
-      ...item,
-      duracao:Number.isFinite(item.duracao)
-        && item.duracao>0
-        ? item.duracao
-        : 30
-    }));
+  const novos=(Array.isArray(lista)?lista:[])
+    .filter(a=>texto(a.urlVideo))
+    .sort((a,b)=>Number(a.ordem||0)-Number(b.ordem||0));
 
   const novaAssinatura=JSON.stringify(novos);
 
@@ -392,17 +224,9 @@ function mostrarPublicidade(lista){
 }
 
 function receber(dados){
-  mostrarProdutos(
-    campo(dados,"produtos","Produtos")
-  );
-
-  mostrarRodape(
-    campo(dados,"rodape","Rodapé")
-  );
-
-  mostrarPublicidade(
-    campo(dados,"publicidade","Publicidade","anuncios")
-  );
+  mostrarProdutos(dados.produtos);
+  mostrarRodape(dados.rodape);
+  mostrarPublicidade(dados.publicidade);
 }
 
 let numero=0;
@@ -417,11 +241,11 @@ function atualizar(){
     script.remove();
   };
 
-  script.src=
-    API+"?callback="+callback+"&t="+Date.now();
+  script.src=API+"?callback="+callback+"&t="+Date.now();
 
   script.onerror=function(){
-    console.error("Erro ao carregar Google Sheets");
+    document.getElementById("anuncio").textContent=
+      "Erro ao carregar dados do Google Sheets";
     delete window[callback];
     script.remove();
   };
