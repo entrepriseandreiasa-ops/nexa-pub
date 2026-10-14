@@ -5,276 +5,497 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>NEXA PUB — AUTHÊNTICA</title>
+
 <style>
-:root{--amarelo:#ffd400;--rodape:58px}
-*{box-sizing:border-box}
-html,body{width:100%;height:100%;margin:0;overflow:hidden}
-body{background:#101010;color:white;font-family:Arial,sans-serif}
-main{display:flex;height:calc(100dvh - var(--rodape))}
-#publicidade{position:relative;width:38%;height:100%;background:#000;overflow:hidden;flex-shrink:0}
-#anuncio{position:absolute;inset:0;overflow:hidden;background:#000}
-#youtube-player{position:absolute}
-#anuncio video{width:100%;height:100%;object-fit:cover}
-#mensagem{height:100%;display:flex;align-items:center;justify-content:center;text-align:center;font-size:2vw}
-#menu{flex:1;min-width:0;padding:1.1vw 1.3vw;overflow:hidden}
-h1{color:var(--amarelo);font-size:2.2vw;margin:0 0 10px}
-#produtos{height:calc(100% - 55px);overflow:hidden}
-.linha{display:flex;justify-content:space-between;gap:14px;padding:5px 0;border-bottom:1px solid #292929;font-size:1.1vw}
-.preco{color:var(--amarelo);font-weight:bold;white-space:nowrap}
-footer{height:var(--rodape);background:var(--amarelo);color:#000;display:flex;align-items:center;overflow:hidden}
-#rodape{white-space:nowrap;display:inline-block;flex-shrink:0;padding-left:100vw;font-size:1.4vw;font-weight:bold;animation:deslizar 35s linear infinite}
-@keyframes deslizar{from{transform:translateX(0)}to{transform:translateX(-100%)}}
+:root {
+  --amarelo: #ffd400;
+  --rodape: 58px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+body {
+  background: #101010;
+  color: white;
+  font-family: Arial, sans-serif;
+}
+
+main {
+  display: flex;
+  width: 100%;
+  height: calc(100dvh - var(--rodape));
+}
+
+/* PUBLICIDADE */
+
+#publicidade {
+  position: relative;
+  width: 38%;
+  height: 100%;
+  flex-shrink: 0;
+  background: #000;
+  overflow: hidden;
+}
+
+#anuncio {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #000;
+}
+
+#anuncio iframe {
+  position: absolute;
+  border: 0;
+  display: block;
+}
+
+#anuncio video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+#mensagem {
+  padding: 20px;
+  font-size: 2vw;
+  text-align: center;
+}
+
+/* MENU */
+
+#menu {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 1.1vw 1.3vw;
+  overflow: hidden;
+}
+
+h1 {
+  color: var(--amarelo);
+  font-size: clamp(22px, 2.2vw, 42px);
+  margin: 0 0 10px;
+}
+
+#produtos {
+  height: calc(100% - 55px);
+  overflow: hidden;
+}
+
+.linha {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 5px 0;
+  border-bottom: 1px solid #292929;
+  font-size: clamp(12px, 1.1vw, 22px);
+}
+
+.preco {
+  color: var(--amarelo);
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+/* RODAPÉ */
+
+footer {
+  height: var(--rodape);
+  background: var(--amarelo);
+  color: #000;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+#rodape {
+  display: inline-block;
+  flex-shrink: 0;
+  white-space: nowrap;
+  padding-left: 100vw;
+  font-size: clamp(18px, 1.4vw, 28px);
+  font-weight: bold;
+  animation: deslizar 35s linear infinite;
+}
+
+@keyframes deslizar {
+  from { transform: translateX(0); }
+  to { transform: translateX(-100%); }
+}
 </style>
 </head>
+
 <body>
 
 <main>
-<section id="publicidade">
-<div id="anuncio"><div id="mensagem">A carregar publicidade...</div></div>
-</section>
-<section id="menu">
-<h1>AUTHÊNTICA — MENU</h1>
-<div id="produtos">A carregar produtos...</div>
-</section>
+  <section id="publicidade">
+    <div id="anuncio">
+      <div id="mensagem">A carregar publicidade...</div>
+    </div>
+  </section>
+
+  <section id="menu">
+    <h1>AUTHÊNTICA — MENU</h1>
+    <div id="produtos">A carregar produtos...</div>
+  </section>
 </main>
-<footer><div id="rodape">Bem-vindo à AUTHÊNTICA</div></footer>
+
+<footer>
+  <div id="rodape">Bem-vindo à AUTHÊNTICA</div>
+</footer>
 
 <script>
 "use strict";
 
-const API="https://script.google.com/macros/s/AKfycbwijR8z9g_tcbiru_uHKN3BVVxaQocU-lXFI6l9Vvk2JP_rs21EZG0aTakhzka_pIQ/exec";
-const texto=v=>String(v??"").trim();
+const API = "https://script.google.com/macros/s/AKfycbwijR8z9g_tcbiru_uHKN3BVVxaQocU-lXFI6l9Vvk2JP_rs21EZG0aTakhzka_pIQ/exec";
 
-let anuncios=[];
-let indice=0;
-let assinatura="";
-let player=null;
-let youtubePronto=false;
-let pedido=0;
-let geracao=0;
-let temporizador=null;
+const texto = valor => String(valor ?? "").trim();
 
-const anuncioEl=document.getElementById("anuncio");
-const publicidadeEl=document.getElementById("publicidade");
+const anuncioEl = document.getElementById("anuncio");
+const publicidadeEl = document.getElementById("publicidade");
 
-function formatarPreco(v){
- const n=Number(texto(v).replace(",","."));
- return Number.isFinite(n)
- ?n.toLocaleString("pt-PT",{style:"currency",currency:"EUR"})
- :texto(v);
+let anuncios = [];
+let indice = 0;
+let assinatura = "";
+let player = null;
+let youtubePronto = false;
+let pedido = 0;
+let geracao = 0;
+let temporizador = null;
+
+/* PREÇOS */
+
+function formatarPreco(valor) {
+  const numero = Number(texto(valor).replace(",", "."));
+
+  return Number.isFinite(numero)
+    ? numero.toLocaleString("pt-PT", {
+        style: "currency",
+        currency: "EUR"
+      })
+    : texto(valor);
 }
 
-function mostrarProdutos(lista){
- const caixa=document.getElementById("produtos");
- caixa.replaceChildren();
- (Array.isArray(lista)?lista:[]).forEach(p=>{
-  if(!texto(p.produto))return;
-  const linha=document.createElement("div");
-  linha.className="linha";
-  const nome=document.createElement("span");
-  nome.textContent=p.produto;
-  const valor=document.createElement("span");
-  valor.className="preco";
-  valor.textContent=formatarPreco(p.preco);
-  linha.append(nome,valor);
-  caixa.append(linha);
- });
-}
+/* PRODUTOS */
 
-function mostrarRodape(lista){
- const mensagens=(Array.isArray(lista)?lista:[])
- .slice().sort((a,b)=>Number(a.ordem||0)-Number(b.ordem||0))
- .map(r=>texto(r.texto)).filter(Boolean);
- document.getElementById("rodape").textContent=
- mensagens.join("     •     ")||"Bem-vindo à AUTHÊNTICA";
-}
+function mostrarProdutos(lista) {
+  const caixa = document.getElementById("produtos");
+  caixa.replaceChildren();
 
-function youtubeId(url){
- try{
-  const u=new URL(url);
-  const host=u.hostname.toLowerCase();
-  if(["youtu.be","www.youtu.be"].includes(host))
-   return u.pathname.split("/")[1]||"";
-  if(["youtube.com","www.youtube.com","m.youtube.com",
-      "youtube-nocookie.com","www.youtube-nocookie.com"].includes(host)){
-   if(u.pathname==="/watch")return u.searchParams.get("v")||"";
-   const p=u.pathname.split("/");
-   if(["embed","shorts","live"].includes(p[1]))return p[2]||"";
-  }
- }catch(e){}
- return "";
-}
+  (Array.isArray(lista) ? lista : []).forEach(produto => {
+    if (!texto(produto.produto)) return;
 
-function ajustarYoutube(){
- const iframe=anuncioEl.querySelector("iframe");
- if(!iframe)return;
- const w=publicidadeEl.clientWidth;
- const h=publicidadeEl.clientHeight;
- if(!w||!h)return;
- const largura=Math.max(w,h*16/9);
- const altura=Math.max(h,w*9/16);
- iframe.style.position="absolute";
- iframe.style.width=largura+"px";
- iframe.style.height=altura+"px";
- iframe.style.left="50%";
- iframe.style.top="50%";
- iframe.style.transform="translate(-50%,-50%)";
- iframe.style.border="0";
-}
+    const linha = document.createElement("div");
+    linha.className = "linha";
 
-function mostrarMensagem(m){
- anuncioEl.replaceChildren();
- const div=document.createElement("div");
- div.id="mensagem";
- div.textContent=m;
- anuncioEl.append(div);
-}
+    const nome = document.createElement("span");
+    nome.textContent = produto.produto;
 
-function proximoAnuncio(){
- if(!anuncios.length)return;
- indice=(indice+1)%anuncios.length;
- mostrarAnuncio();
-}
+    const valor = document.createElement("span");
+    valor.className = "preco";
+    valor.textContent = formatarPreco(produto.preco);
 
-function mostrarAnuncio(){
- geracao++;
- const atual=geracao;
- clearTimeout(temporizador);
-
- if(player){
-  const anterior=player;
-  player=null;
-  try{anterior.destroy()}catch(e){}
- }
- anuncioEl.replaceChildren();
-
- if(!anuncios.length){
-  mostrarMensagem("Sem anúncios ativos");
-  return;
- }
-
- const a=anuncios[indice%anuncios.length];
- const url=texto(a.urlVideo);
- const id=youtubeId(url);
-
- if(id){
-  if(!youtubePronto){
-   mostrarMensagem("A carregar vídeo...");
-   return;
-  }
-
-  const div=document.createElement("div");
-  div.id="youtube-player";
-  anuncioEl.append(div);
-
-  player=new YT.Player("youtube-player",{
-   videoId:id,
-   playerVars:{
-    autoplay:1,
-    mute:1,
-    controls:0,
-    playsinline:1,
-    rel:0,
-    fs:0,
-    disablekb:1,
-    iv_load_policy:3
-   },
-   events:{
-    onReady:function(event){
-     if(atual!==geracao)return;
-     event.target.mute();
-     event.target.playVideo();
-     ajustarYoutube();
-    },
-    onStateChange:function(event){
-     if(atual!==geracao)return;
-     if(event.data===YT.PlayerState.ENDED){
-      proximoAnuncio();
-     }
-    },
-    onError:function(){
-     if(atual!==geracao)return;
-     proximoAnuncio();
-    }
-   }
+    linha.append(nome, valor);
+    caixa.append(linha);
   });
-  return;
- }
-
- if(/^https?:\/\//i.test(url)){
-  const video=document.createElement("video");
-  video.src=url;
-  video.autoplay=true;
-  video.muted=true;
-  video.playsInline=true;
-  video.controls=false;
-  video.loop=false;
-  video.onended=()=>{
-   if(atual===geracao)proximoAnuncio();
-  };
-  video.onerror=()=>{
-   if(atual===geracao)proximoAnuncio();
-  };
-  anuncioEl.append(video);
-  video.play().catch(()=>{});
-  return;
- }
-
- mostrarMensagem(a.nome||"Publicidade");
- temporizador=setTimeout(()=>{
-  if(atual===geracao)proximoAnuncio();
- },30000);
 }
 
-function mostrarPublicidade(lista){
- const novos=(Array.isArray(lista)?lista:[])
- .filter(a=>texto(a.urlVideo))
- .sort((a,b)=>Number(a.ordem||0)-Number(b.ordem||0));
- const nova=JSON.stringify(novos);
- if(nova!==assinatura){
-  assinatura=nova;
-  anuncios=novos;
-  indice=0;
+/* RODAPÉ */
+
+function mostrarRodape(lista) {
+  const mensagens = (Array.isArray(lista) ? lista : [])
+    .slice()
+    .sort((a, b) => Number(a.ordem || 0) - Number(b.ordem || 0))
+    .map(item => texto(item.texto))
+    .filter(Boolean);
+
+  document.getElementById("rodape").textContent =
+    mensagens.join("     •     ") || "Bem-vindo à AUTHÊNTICA";
+}
+
+/* YOUTUBE */
+
+function youtubeId(url) {
+  try {
+    const u = new URL(url);
+    const host = u.hostname.toLowerCase();
+
+    if (["youtu.be", "www.youtu.be"].includes(host)) {
+      return u.pathname.split("/")[1] || "";
+    }
+
+    if ([
+      "youtube.com",
+      "www.youtube.com",
+      "m.youtube.com",
+      "youtube-nocookie.com",
+      "www.youtube-nocookie.com"
+    ].includes(host)) {
+
+      if (u.pathname === "/watch") {
+        return u.searchParams.get("v") || "";
+      }
+
+      const partes = u.pathname.split("/");
+
+      if (["embed", "shorts", "live"].includes(partes[1])) {
+        return partes[2] || "";
+      }
+    }
+  } catch (erro) {}
+
+  return "";
+}
+
+/* AJUSTAR TAMANHO DO VÍDEO */
+
+function ajustarYoutube() {
+  const iframe = anuncioEl.querySelector("iframe");
+  if (!iframe) return;
+
+  const largura = publicidadeEl.clientWidth;
+  const altura = publicidadeEl.clientHeight;
+
+  if (!largura || !altura) return;
+
+  const proporcao = 16 / 9;
+
+  let larguraVideo = largura;
+  let alturaVideo = largura / proporcao;
+
+  if (alturaVideo > altura) {
+    alturaVideo = altura;
+    larguraVideo = altura * proporcao;
+  }
+
+  iframe.style.position = "absolute";
+  iframe.style.width = larguraVideo + "px";
+  iframe.style.height = alturaVideo + "px";
+  iframe.style.left = "50%";
+  iframe.style.top = "50%";
+  iframe.style.transform = "translate(-50%, -50%)";
+  iframe.style.border = "0";
+}
+
+/* MENSAGENS */
+
+function mostrarMensagem(mensagem) {
+  anuncioEl.replaceChildren();
+
+  const div = document.createElement("div");
+  div.id = "mensagem";
+  div.textContent = mensagem;
+
+  anuncioEl.append(div);
+}
+
+/* PASSAR AO ANÚNCIO SEGUINTE */
+
+function proximoAnuncio() {
+  if (!anuncios.length) return;
+
+  indice = (indice + 1) % anuncios.length;
   mostrarAnuncio();
- }
 }
 
-function receber(dados){
- if(!dados)return;
- mostrarProdutos(dados.produtos);
- mostrarRodape(dados.rodape);
- mostrarPublicidade(dados.publicidade);
+/* REPRODUZIR ANÚNCIO ATÉ AO FIM */
+
+function mostrarAnuncio() {
+  geracao++;
+  const atual = geracao;
+
+  clearTimeout(temporizador);
+
+  if (player) {
+    const anterior = player;
+    player = null;
+    try {
+      anterior.destroy();
+    } catch (erro) {}
+  }
+
+  anuncioEl.replaceChildren();
+
+  if (!anuncios.length) {
+    mostrarMensagem("Sem anúncios ativos");
+    return;
+  }
+
+  const anuncio = anuncios[indice % anuncios.length];
+  const url = texto(anuncio.urlVideo);
+  const id = youtubeId(url);
+
+  if (id) {
+    if (!youtubePronto) {
+      mostrarMensagem("A carregar vídeo...");
+      return;
+    }
+
+    const div = document.createElement("div");
+    div.id = "youtube-player";
+    anuncioEl.append(div);
+
+    player = new YT.Player("youtube-player", {
+      videoId: id,
+      playerVars: {
+        autoplay: 1,
+        mute: 1,
+        controls: 0,
+        playsinline: 1,
+        rel: 0,
+        fs: 0,
+        disablekb: 1,
+        iv_load_policy: 3
+      },
+      events: {
+        onReady: function(event) {
+          if (atual !== geracao) return;
+
+          event.target.mute();
+          event.target.playVideo();
+          ajustarYoutube();
+        },
+
+        onStateChange: function(event) {
+          if (atual !== geracao) return;
+
+          if (event.data === YT.PlayerState.ENDED) {
+            proximoAnuncio();
+          }
+        },
+
+        onError: function() {
+          if (atual !== geracao) return;
+          proximoAnuncio();
+        }
+      }
+    });
+
+    return;
+  }
+
+  if (/^https?:\/\//i.test(url)) {
+    const video = document.createElement("video");
+
+    video.src = url;
+    video.autoplay = true;
+    video.muted = true;
+    video.playsInline = true;
+    video.controls = false;
+    video.loop = false;
+
+    video.onended = function() {
+      if (atual === geracao) proximoAnuncio();
+    };
+
+    video.onerror = function() {
+      if (atual === geracao) proximoAnuncio();
+    };
+
+    anuncioEl.append(video);
+    video.play().catch(() => {});
+
+    return;
+  }
+
+  mostrarMensagem(anuncio.nome || "Publicidade");
+
+  temporizador = setTimeout(() => {
+    if (atual === geracao) proximoAnuncio();
+  }, 30000);
 }
 
-function atualizar(){
- const callback="nexaCallback"+(++pedido);
- const script=document.createElement("script");
- window[callback]=function(dados){
-  receber(dados);
-  delete window[callback];
-  script.remove();
- };
- script.src=API+"?callback="+callback+"&t="+Date.now();
- script.onerror=()=>{
-  delete window[callback];
-  script.remove();
- };
- document.body.append(script);
+/* PUBLICIDADE DO GOOGLE SHEETS */
+
+function mostrarPublicidade(lista) {
+  const novos = (Array.isArray(lista) ? lista : [])
+    .filter(anuncio => texto(anuncio.urlVideo))
+    .sort(
+      (a, b) =>
+        Number(a.ordem || 0) - Number(b.ordem || 0)
+    );
+
+  const novaAssinatura = JSON.stringify(novos);
+
+  if (novaAssinatura !== assinatura) {
+    assinatura = novaAssinatura;
+    anuncios = novos;
+    indice = 0;
+    mostrarAnuncio();
+  }
 }
 
-window.onYouTubeIframeAPIReady=function(){
- youtubePronto=true;
- if(anuncios.length)mostrarAnuncio();
+/* RECEBER DADOS */
+
+function receber(dados) {
+  if (!dados) return;
+
+  mostrarProdutos(dados.produtos);
+  mostrarRodape(dados.rodape);
+  mostrarPublicidade(dados.publicidade);
+}
+
+/* ATUALIZAR GOOGLE SHEETS */
+
+function atualizar() {
+  const callback = "nexaCallback" + (++pedido);
+  const script = document.createElement("script");
+
+  window[callback] = function(dados) {
+    receber(dados);
+    delete window[callback];
+    script.remove();
+  };
+
+  script.src =
+    API +
+    "?callback=" + callback +
+    "&t=" + Date.now();
+
+  script.onerror = function() {
+    delete window[callback];
+    script.remove();
+  };
+
+  document.body.append(script);
+}
+
+/* API YOUTUBE */
+
+window.onYouTubeIframeAPIReady = function() {
+  youtubePronto = true;
+
+  if (anuncios.length) {
+    mostrarAnuncio();
+  }
 };
 
-const youtubeScript=document.createElement("script");
-youtubeScript.src="https://www.youtube.com/iframe_api";
+const youtubeScript = document.createElement("script");
+youtubeScript.src = "https://www.youtube.com/iframe_api";
 document.head.append(youtubeScript);
 
-window.addEventListener("resize",ajustarYoutube);
+/* AJUSTAR QUANDO O ECRÃ MUDA */
+
+window.addEventListener("resize", ajustarYoutube);
+
+/* INICIAR */
 
 atualizar();
-setInterval(atualizar,60000);
+setInterval(atualizar, 60000);
+
 </script>
 </body>
 </html>
