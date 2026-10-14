@@ -1,0 +1,30 @@
+
+name: Teste HLS NEXA PUB
+
+on:
+  workflow_dispatch:
+
+jobs:
+  teste:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Instalar FFmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+
+      - name: Gerar vídeo HLS de teste
+        run: |
+          mkdir -p hls
+          ffmpeg -f lavfi -i "color=c=black:s=1280x720:r=25" \
+            -f lavfi -i "anullsrc=r=44100:cl=stereo" \
+            -t 30 -c:v libx264 -preset ultrafast \
+            -pix_fmt yuv420p -c:a aac \
+            -f hls -hls_time 5 \
+            hls/index.m3u8
+
+      - name: Guardar resultado
+        uses: actions/upload-artifact@v4
+        with:
+          name: teste-hls
+          path: hls/
