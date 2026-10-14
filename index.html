@@ -3,163 +3,188 @@
 <html lang="pt">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>NEXA PUB — AUTHÊNTICA</title>
 <style>
 *{box-sizing:border-box}
 html,body{margin:0;width:100%;height:100%;overflow:hidden}
-body{background:#111;color:#fff;font-family:Arial,sans-serif}
-main{height:calc(100vh - 65px);display:flex}
-#publicidade{
-  width:38%;background:#191919;
-  display:flex;align-items:center;justify-content:center;
-  text-align:center;font-size:3vw
-}
-#menu{width:62%;padding:2vw;overflow:hidden}
-h1{color:#ffd400;font-size:3vw;margin:0 0 16px}
-#produtos{height:calc(100% - 65px);overflow:hidden}
-.linha{
-  display:flex;justify-content:space-between;gap:15px;
-  padding:7px 0;border-bottom:1px solid #333;
-  font-size:1.35vw
-}
-.preco{color:#ffd400;white-space:nowrap;font-weight:bold}
-footer{
-  height:65px;background:#ffd400;color:#000;
-  display:flex;align-items:center;overflow:hidden;
-  font-size:25px;font-weight:bold
-}
-#rodape{
-  display:inline-block;white-space:nowrap;
-  padding-left:100vw;
-  animation:deslizar 35s linear infinite
-}
-@keyframes deslizar{
-  from{transform:translateX(0)}
-  to{transform:translateX(-100%)}
-}
+body{background:#111;color:white;font-family:Arial,sans-serif}
+main{display:flex;height:calc(100vh - 65px)}
+#publicidade{width:38%;background:#191919;position:relative;overflow:hidden}
+#anuncio{width:100%;height:100%;display:flex;align-items:center;justify-content:center;text-align:center;font-size:2.5vw}
+#anuncio iframe,#anuncio video{width:100%;height:100%;border:0;object-fit:contain}
+#menu{width:62%;padding:1.5vw;overflow:hidden}
+h1{color:#ffd400;font-size:2.5vw;margin:0 0 12px}
+#produtos{height:calc(100% - 55px);overflow:hidden}
+.linha{display:flex;justify-content:space-between;gap:15px;padding:6px 0;border-bottom:1px solid #333;font-size:1.25vw}
+.preco{color:#ffd400;font-weight:bold;white-space:nowrap}
+footer{height:65px;background:#ffd400;color:black;display:flex;align-items:center;overflow:hidden;font-size:24px;font-weight:bold}
+#rodape{white-space:nowrap;display:inline-block;padding-left:100vw;animation:deslizar 35s linear infinite}
+@keyframes deslizar{from{transform:translateX(0)}to{transform:translateX(-100%)}}
 </style>
 </head>
 <body>
-
 <main>
-  <section id="publicidade">
-    NEXA PUB<br>PUBLICIDADE
-  </section>
-
-  <section id="menu">
-    <h1>AUTHÊNTICA — MENU</h1>
-    <div id="produtos">A carregar produtos...</div>
-  </section>
+<section id="publicidade"><div id="anuncio">NEXA PUB — PUBLICIDADE</div></section>
+<section id="menu">
+<h1>AUTHÊNTICA — MENU</h1>
+<div id="produtos">A carregar produtos...</div>
+</section>
 </main>
-
-<footer>
-  <div id="rodape">Bem-vindo à AUTHÊNTICA</div>
-</footer>
+<footer><div id="rodape">Bem-vindo à AUTHÊNTICA</div></footer>
 
 <script>
-const API = "https://script.google.com/macros/s/AKfycbzg93sm7ajA6bo2nKhDrUzbqtttcYiAMYg2r8EIML8JK0rfuRSlGQzUkBrDqEzeLLzk/exec";
+const API="https://script.google.com/macros/s/AKfycbzg93sm7ajA6bo2nKhDrUzbqtttcYiAMYg2r8EIML8JK0rfuRSlGQzUkBrDqEzeLLzk/exec";
 
-function ativo(valor){
-  return ["SIM","TRUE","1","YES"].includes(
-    String(valor ?? "").trim().toUpperCase()
-  );
+const texto=v=>String(v??"").trim();
+const ativo=v=>["SIM","TRUE","1","YES"].includes(texto(v).toUpperCase());
+
+function preco(v){
+ const s=texto(v);
+ if(!s)return "";
+ if(s.includes("€"))return s;
+ const n=Number(s.replace(",","."));
+ return Number.isFinite(n)?n.toLocaleString("pt-PT",{style:"currency",currency:"EUR"}):s;
 }
 
-function texto(valor){
-  return String(valor ?? "").trim();
+function mostrarProdutos(lista){
+ const caixa=document.getElementById("produtos");
+ caixa.replaceChildren();
+ (Array.isArray(lista)?lista:[]).forEach(p=>{
+  if(!ativo(p.mostrar??p.mostrarNoMenu??p["Mostrar no menu?"]??"SIM"))return;
+  const nome=texto(p.produto??p.nome??p.Produto);
+  if(!nome)return;
+  const linha=document.createElement("div");
+  linha.className="linha";
+  const a=document.createElement("span");
+  a.textContent=nome;
+  const b=document.createElement("span");
+  b.className="preco";
+  b.textContent=preco(p.preco??p.preço??p["Preço (€)"]);
+  linha.append(a,b);
+  caixa.append(linha);
+ });
 }
 
-function formatarPreco(valor){
-  const original=texto(valor);
-  if(!original)return "";
-  if(original.includes("€"))return original;
-  const numero=Number(original.replace(",","."));
-  if(!Number.isFinite(numero))return original;
-  return numero.toLocaleString("pt-PT",{
-    style:"currency",currency:"EUR"
-  });
+function mostrarRodape(lista){
+ let mensagens=[];
+ if(Array.isArray(lista)){
+  mensagens=lista
+   .filter(x=>ativo(x.ativo??x.Ativo??"SIM"))
+   .sort((a,b)=>Number(a.ordem??0)-Number(b.ordem??0))
+   .map(x=>texto(x.texto??x.mensagem??x["Texto do rodapé"]))
+   .filter(Boolean);
+ }else if(typeof lista==="string"){
+  mensagens=[lista];
+ }
+ document.getElementById("rodape").textContent=
+  mensagens.length?mensagens.join("     •     "):"Bem-vindo à AUTHÊNTICA";
+}
+
+let anuncios=[];
+let indice=0;
+let temporizador=null;
+let assinatura="";
+
+function youtubeId(url){
+ try{
+  const u=new URL(url);
+  const host=u.hostname.toLowerCase();
+  if(host==="youtu.be"||host==="www.youtu.be")
+   return u.pathname.split("/")[1]||"";
+  if(["youtube.com","www.youtube.com","m.youtube.com","youtube-nocookie.com","www.youtube-nocookie.com"].includes(host)){
+   if(u.pathname==="/watch")return u.searchParams.get("v")||"";
+   const partes=u.pathname.split("/");
+   if(["embed","shorts","live"].includes(partes[1]))return partes[2]||"";
+  }
+ }catch(e){}
+ return "";
+}
+
+function mostrarAnuncio(){
+ clearTimeout(temporizador);
+ const caixa=document.getElementById("anuncio");
+ caixa.replaceChildren();
+
+ if(!anuncios.length){
+  caixa.textContent="NEXA PUB — PUBLICIDADE";
+  return;
+ }
+
+ const a=anuncios[indice%anuncios.length];
+ const url=texto(a.url??a.video??a["URL do vídeo"]);
+ const id=youtubeId(url);
+ const duracao=Number(a.duracao??a["Duração (seg)"]??30);
+ const segundos=Number.isFinite(duracao)&&duracao>0?duracao:30;
+
+ if(id){
+  const iframe=document.createElement("iframe");
+  iframe.src="https://www.youtube-nocookie.com/embed/"+encodeURIComponent(id)+"?autoplay=1&mute=1&controls=0&playsinline=1&loop=1&playlist="+encodeURIComponent(id);
+  iframe.allow="autoplay; encrypted-media; picture-in-picture";
+  iframe.referrerPolicy="strict-origin-when-cross-origin";
+  caixa.append(iframe);
+ }else if(/^https?:\/\//i.test(url)){
+  const video=document.createElement("video");
+  video.src=url;
+  video.autoplay=true;
+  video.muted=true;
+  video.playsInline=true;
+  video.loop=true;
+  caixa.append(video);
+  video.play().catch(()=>{});
+ }else{
+  caixa.textContent=texto(a.nome??"PUBLICIDADE");
+ }
+
+ temporizador=setTimeout(()=>{
+  indice=(indice+1)%anuncios.length;
+  mostrarAnuncio();
+ },segundos*1000);
+}
+
+function mostrarPublicidade(lista){
+ const novos=(Array.isArray(lista)?lista:[])
+  .filter(a=>ativo(a.ativo??a.Ativo??"NÃO"))
+  .map(a=>({
+   nome:a.nome??a["Nome do anúncio"]??"",
+   url:a.url??a.video??a["URL do vídeo"]??"",
+   duracao:a.duracao??a["Duração (seg)"]??30,
+   ordem:Number(a.ordem??0)
+  }))
+  .filter(a=>texto(a.url))
+  .sort((a,b)=>a.ordem-b.ordem);
+
+ const novaAssinatura=JSON.stringify(novos);
+ if(novaAssinatura!==assinatura){
+  assinatura=novaAssinatura;
+  anuncios=novos;
+  indice=0;
+  mostrarAnuncio();
+ }
 }
 
 function receber(dados){
-  // PRODUTOS E PREÇOS
-  const produtos=Array.isArray(dados.produtos)
-    ? dados.produtos : [];
-
-  const caixa=document.getElementById("produtos");
-  caixa.replaceChildren();
-
-  produtos.forEach(p=>{
-    const visibilidade=p.mostrar ?? p.mostrarNoMenu
-      ?? p["Mostrar no menu?"] ?? "SIM";
-
-    if(!ativo(visibilidade))return;
-
-    const nome=texto(p.produto ?? p.nome ?? p.Produto);
-    if(!nome)return;
-
-    const linha=document.createElement("div");
-    linha.className="linha";
-
-    const descricao=document.createElement("span");
-    descricao.textContent=nome;
-
-    const preco=document.createElement("span");
-    preco.className="preco";
-    preco.textContent=formatarPreco(
-      p.preco ?? p.preço ?? p["Preço (€)"]
-    );
-
-    linha.append(descricao,preco);
-    caixa.appendChild(linha);
-  });
-
-  if(!caixa.children.length){
-    caixa.textContent="Sem produtos disponíveis";
-  }
-
-  // RODAPÉ
-  let mensagens=[];
-
-  if(Array.isArray(dados.rodape)){
-    mensagens=dados.rodape
-      .filter(item=>ativo(item.ativo ?? item.Ativo ?? "SIM"))
-      .sort((a,b)=>Number(a.ordem ?? a.Ordem ?? 0)
-                  -Number(b.ordem ?? b.Ordem ?? 0))
-      .map(item=>texto(
-        item.texto ?? item["Texto do rodapé"] ?? item.mensagem
-      ))
-      .filter(Boolean);
-  }else if(typeof dados.rodape==="string"){
-    mensagens=[dados.rodape];
-  }
-
-  const rodape=document.getElementById("rodape");
-  rodape.textContent=mensagens.length
-    ? mensagens.join("     •     ")
-    : "Bem-vindo à AUTHÊNTICA";
+ mostrarProdutos(dados.produtos);
+ mostrarRodape(dados.rodape);
+ mostrarPublicidade(dados.publicidade);
 }
 
-let carregamento=0;
-
+let numero=0;
 function atualizar(){
-  const callback="nexaReceber"+(++carregamento);
-  const script=document.createElement("script");
-
-  window[callback]=function(dados){
-    receber(dados);
-    delete window[callback];
-    script.remove();
-  };
-
-  script.src=API+"?callback="+callback+"&t="+Date.now();
-  script.onerror=function(){
-    console.error("Erro ao carregar dados do Google Sheets");
-    delete window[callback];
-    script.remove();
-  };
-
-  document.body.appendChild(script);
+ const callback="nexaCallback"+(++numero);
+ const script=document.createElement("script");
+ window[callback]=function(dados){
+  receber(dados);
+  delete window[callback];
+  script.remove();
+ };
+ script.src=API+"?callback="+callback+"&t="+Date.now();
+ script.onerror=function(){
+  console.error("Erro ao carregar Google Sheets");
+  delete window[callback];
+  script.remove();
+ };
+ document.body.appendChild(script);
 }
 
 atualizar();
