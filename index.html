@@ -3,20 +3,20 @@
 <html lang="pt">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>NEXA PUB — AUTHENTICA</title>
 <style>
 *{box-sizing:border-box}
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#080808;color:#fff;font-family:Arial,Helvetica,sans-serif}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#080808;color:#fff;font-family:Arial,sans-serif}
 #ecra{display:flex;width:100vw;height:calc(100dvh - 55px)}
 #publicidade{width:38%;height:100%;background:#000;display:flex;align-items:center;justify-content:center;overflow:hidden}
 #video-container{width:100%;max-height:100%;aspect-ratio:16/9;position:relative}
 #video-container iframe,#video-container video{position:absolute;inset:0;width:100%;height:100%;border:0;object-fit:contain}
 #direita{width:62%;height:100%;background:#111;overflow:hidden}
 .pagina{width:100%;height:100%;padding:25px;overflow:hidden}
-.titulo{color:#ffd400;text-align:center;font-size:clamp(24px,2.5vw,48px);font-weight:bold;margin-bottom:20px;text-transform:uppercase}
-.categoria{font-size:clamp(19px,1.8vw,32px);color:#ffd400;font-weight:bold;margin-top:17px;margin-bottom:8px;border-bottom:1px solid #555;padding-bottom:6px}
-.produto-linha{display:flex;justify-content:space-between;align-items:baseline;gap:15px;padding:7px 0;font-size:clamp(16px,1.55vw,30px)}
+.titulo{color:#ffd400;text-align:center;font-size:clamp(24px,2.5vw,48px);font-weight:bold;margin-bottom:20px}
+.categoria{font-size:clamp(19px,1.8vw,32px);color:#ffd400;font-weight:bold;margin:17px 0 8px;border-bottom:1px solid #555;padding-bottom:6px}
+.produto-linha{display:flex;justify-content:space-between;gap:15px;padding:7px 0;font-size:clamp(16px,1.55vw,30px)}
 .preco{color:#ffd400;font-weight:bold;white-space:nowrap}
 .grelha{height:100%;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:16px}
 .cartao{background:#202020;border-radius:12px;overflow:hidden;display:flex;flex-direction:column;min-width:0;min-height:0}
@@ -25,9 +25,9 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#080808;col
 .cartao-nome{font-size:clamp(17px,1.8vw,32px);font-weight:bold}
 .cartao-preco{color:#ffd400;font-size:clamp(20px,2.1vw,38px);font-weight:bold;margin-top:5px}
 .imagem-completa{width:100%;height:100%;object-fit:contain}
-#rodape{position:absolute;left:0;bottom:0;width:100%;height:55px;background:#ffd400;color:#000;overflow:hidden;display:flex;align-items:center;white-space:nowrap;z-index:20}
+#rodape{position:absolute;bottom:0;width:100%;height:55px;background:#ffd400;color:#000;overflow:hidden;display:flex;align-items:center;white-space:nowrap}
 #texto-rodape{display:inline-block;padding-left:100vw;font-size:27px;font-weight:bold;animation:deslocar 35s linear infinite}
-@keyframes deslocar{from{transform:translateX(0)}to{transform:translateX(-100%)}}
+@keyframes deslocar{to{transform:translateX(-100%)}}
 body.modo-publicidade #ecra{height:100dvh}
 body.modo-publicidade #publicidade{width:100%}
 body.modo-publicidade #direita,body.modo-publicidade #rodape{display:none}
@@ -36,449 +36,358 @@ body.modo-menu #direita{width:100%}
 </style>
 </head>
 <body>
-
 <div id="ecra">
-  <section id="publicidade">
-    <div id="video-container"></div>
-  </section>
-  <section id="direita"></section>
+<section id="publicidade"><div id="video-container"></div></section>
+<section id="direita"></section>
 </div>
-
-<div id="rodape">
-  <div id="texto-rodape"></div>
-</div>
+<div id="rodape"><div id="texto-rodape"></div></div>
 
 <script>
-const API = "https://script.google.com/macros/s/AKfycbwZiA4tI06xXKsOpFjT05U8E_0kjgGloHI5wpEOl6fFnqAOTKAZXZvMMl0x_wHQaFPJ/exec";
+const API="https://script.google.com/macros/s/AKfycbyUpVKN2nepSUrtBXq8DbiAJYQ3N2BbdJdJaODxq6L_ku0j_36tVIKTtcijtSYdzoR9/exec";
 
-const parametros = new URLSearchParams(location.search);
-const canal = (parametros.get("canal") || "completo").toLowerCase();
-
-if(canal==="publicidade") document.body.classList.add("modo-publicidade");
-if(canal==="menu") document.body.classList.add("modo-menu");
+const canal=new URLSearchParams(location.search).get("canal")||"completo";
+if(canal==="publicidade")document.body.classList.add("modo-publicidade");
+if(canal==="menu")document.body.classList.add("modo-menu");
 
 let dados={produtos:[],rodape:[],publicidade:[],ecraDireito:[]};
-let assinaturaDireita="";
-let assinaturaRodape="";
-let assinaturaPublicidade="";
-let paginas=[];
-let indicePagina=0;
-let temporizadorPagina=null;
-let indiceAnuncio=0;
-let playerYouTube=null;
-let videoAtual="";
-let apiYouTubePronta=false;
-let aguardandoYouTube=false;
+let assinaturaRodape="",assinaturaDireita="",assinaturaPublicidade="";
+let paginas=[],indicePagina=0,temporizadorPagina=null;
+let indiceAnuncio=0,videoAtual="",playerYouTube=null;
+let youtubePronto=false,youtubeScript=false,aguardaYoutube=false;
 let pedidoEmCurso=false;
-let scriptYoutubeAdicionado=false;
 
-function moeda(valor){
-  if(valor===null || valor===undefined || valor==="") return "";
-  const n=Number(valor);
-  return Number.isFinite(n)
-    ? n.toLocaleString("pt-PT",{style:"currency",currency:"EUR"})
-    : "";
+function moeda(v){
+ if(v===null||v===undefined||v==="")return "";
+ const n=Number(v);
+ return Number.isFinite(n)?n.toLocaleString("pt-PT",{style:"currency",currency:"EUR"}):"";
 }
 
 function urlSegura(url){
-  try{
-    const u=new URL(url,location.href);
-    return ["http:","https:"].includes(u.protocol)?u.href:"";
-  }catch{return ""}
+ try{
+  const u=new URL(url,location.href);
+  return ["http:","https:"].includes(u.protocol)?u.href:"";
+ }catch{return ""}
 }
 
 function carregarDados(){
-  if(pedidoEmCurso)return;
-  pedidoEmCurso=true;
+ if(pedidoEmCurso)return;
+ pedidoEmCurso=true;
+ const nome="nexa_"+Date.now()+"_"+Math.random().toString(36).slice(2);
+ const script=document.createElement("script");
+ let terminado=false;
+ const limite=setTimeout(limpar,12000);
 
-  const nomeCallback="nexaCallback_"+Date.now()+"_"+Math.random().toString(36).slice(2);
-  const script=document.createElement("script");
-  let terminado=false;
+ function limpar(){
+  if(terminado)return;
+  terminado=true;
+  clearTimeout(limite);
+  script.remove();
+  delete window[nome];
+  pedidoEmCurso=false;
+ }
 
-  const timeout=setTimeout(limpar,15000);
-
-  function limpar(){
-    if(terminado)return;
-    terminado=true;
-    clearTimeout(timeout);
-    script.remove();
-    delete window[nomeCallback];
-    pedidoEmCurso=false;
-  }
-
-  window[nomeCallback]=function(resposta){
-    limpar();
-    if(!resposta || typeof resposta!=="object")return;
-
-    dados={
-      produtos:Array.isArray(resposta.produtos)?resposta.produtos:[],
-      rodape:Array.isArray(resposta.rodape)?resposta.rodape:[],
-      publicidade:Array.isArray(resposta.publicidade)?resposta.publicidade:[],
-      ecraDireito:Array.isArray(resposta.ecraDireito)?resposta.ecraDireito:[]
-    };
-
-    atualizarRodape();
-    atualizarDireita();
-    atualizarPublicidade();
+ window[nome]=function(resposta){
+  limpar();
+  if(!resposta||typeof resposta!=="object")return;
+  dados={
+   produtos:Array.isArray(resposta.produtos)?resposta.produtos:[],
+   rodape:Array.isArray(resposta.rodape)?resposta.rodape:[],
+   publicidade:Array.isArray(resposta.publicidade)?resposta.publicidade:[],
+   ecraDireito:Array.isArray(resposta.ecraDireito)?resposta.ecraDireito:[]
   };
-
-  script.onerror=limpar;
-  script.src=API+"?callback="+encodeURIComponent(nomeCallback)+"&t="+Date.now();
-  document.head.appendChild(script);
+  atualizarRodape();
+  atualizarDireita();
+  atualizarPublicidade();
+ };
+ script.onerror=limpar;
+ script.src=API+"?callback="+nome+"&t="+Date.now();
+ document.head.appendChild(script);
 }
 
 function atualizarRodape(){
-  const textos=dados.rodape.map(x=>String(x.texto||"").trim()).filter(Boolean);
-  const assinatura=JSON.stringify(textos);
-  if(assinatura===assinaturaRodape)return;
-  assinaturaRodape=assinatura;
-
-  const el=document.getElementById("texto-rodape");
-  el.textContent=textos.join("     ★     ");
-  el.style.animation="none";
-  void el.offsetWidth;
-  el.style.animation="";
+ const textos=dados.rodape.map(x=>String(x.texto||"").trim()).filter(Boolean);
+ const assinatura=JSON.stringify(textos);
+ if(assinatura===assinaturaRodape)return;
+ assinaturaRodape=assinatura;
+ const el=document.getElementById("texto-rodape");
+ el.textContent=textos.join("     ★     ");
+ el.style.animation="none";
+ void el.offsetWidth;
+ el.style.animation="";
 }
 
 function criarPaginas(){
-  const configuracoes=[...dados.ecraDireito].sort((a,b)=>Number(a.ordem)-Number(b.ordem));
-  const resultado=[];
-  let grupo=[];
+ const linhas=[...dados.ecraDireito].sort((a,b)=>Number(a.ordem)-Number(b.ordem));
+ const resultado=[];
+ let grupo=[];
 
-  function fecharGrupo(){
-    if(!grupo.length)return;
-    resultado.push({
-      tipo:"4 PRODUTOS",
-      produtos:grupo,
-      duracao:Number(grupo[0].duracao)||30
-    });
-    grupo=[];
+ function fecharGrupo(){
+  if(!grupo.length)return;
+  resultado.push({
+   tipo:"4 PRODUTOS",
+   produtos:grupo,
+   duracao:Math.max(1,Number(grupo[0].duracao)||30)
+  });
+  grupo=[];
+ }
+
+ for(const item of linhas){
+  const tipo=String(item.tipo||"").trim().toUpperCase();
+  if(tipo==="4 PRODUTOS"){
+   grupo.push(item);
+   if(grupo.length===4)fecharGrupo();
+   continue;
   }
-
-  for(const item of configuracoes){
-    const tipo=String(item.tipo||"").trim().toUpperCase();
-
-    if(tipo==="4 PRODUTOS"){
-      grupo.push(item);
-      if(grupo.length===4)fecharGrupo();
-      continue;
-    }
-
-    fecharGrupo();
-
-    if(tipo==="PREÇOS"){
-      resultado.push({tipo:"PREÇOS",duracao:Number(item.duracao)||30});
-    }
-
-    if(tipo==="IMAGEM" && item.urlImagem){
-      resultado.push({
-        tipo:"IMAGEM",
-        urlImagem:item.urlImagem,
-        duracao:Number(item.duracao)||30
-      });
-    }
-  }
-
   fecharGrupo();
-
-  if(!resultado.length)resultado.push({tipo:"PREÇOS",duracao:30});
-  return resultado;
+  if(tipo==="PREÇOS"){
+   resultado.push({tipo:"PREÇOS",duracao:Math.max(1,Number(item.duracao)||30)});
+  }
+  if(tipo==="IMAGEM"&&item.urlImagem){
+   resultado.push({
+    tipo:"IMAGEM",
+    urlImagem:item.urlImagem,
+    duracao:Math.max(1,Number(item.duracao)||30)
+   });
+  }
+ }
+ fecharGrupo();
+ if(!resultado.length)resultado.push({tipo:"PREÇOS",duracao:30});
+ return resultado;
 }
 
 function atualizarDireita(){
-  const assinatura=JSON.stringify({
-    produtos:dados.produtos,
-    ecraDireito:dados.ecraDireito
-  });
+ const assinatura=JSON.stringify({produtos:dados.produtos,ecraDireito:dados.ecraDireito});
+ if(assinatura===assinaturaDireita)return;
+ assinaturaDireita=assinatura;
 
-  if(assinatura===assinaturaDireita)return;
-  assinaturaDireita=assinatura;
-
-  const tipoAnterior=paginas[indicePagina]?.tipo;
-  paginas=criarPaginas();
-
-  const indice=paginas.findIndex(p=>p.tipo===tipoAnterior);
-  indicePagina=indice>=0?indice:0;
-
-  mostrarPagina();
+ const anterior=paginas[indicePagina]?.tipo;
+ paginas=criarPaginas();
+ const encontrado=paginas.findIndex(p=>p.tipo===anterior);
+ indicePagina=encontrado>=0?encontrado:0;
+ mostrarPagina();
 }
 
 function mostrarPagina(){
-  clearTimeout(temporizadorPagina);
-  if(!paginas.length)return;
+ clearTimeout(temporizadorPagina);
+ if(!paginas.length)return;
+ const p=paginas[indicePagina];
+ const el=document.getElementById("direita");
 
-  const pagina=paginas[indicePagina];
-  const direita=document.getElementById("direita");
+ if(p.tipo==="PREÇOS")mostrarPrecos(el);
+ if(p.tipo==="4 PRODUTOS")mostrarQuatro(el,p.produtos);
+ if(p.tipo==="IMAGEM")mostrarImagem(el,p.urlImagem);
 
-  if(pagina.tipo==="PREÇOS")mostrarPrecos(direita);
-  if(pagina.tipo==="4 PRODUTOS")mostrarQuatroProdutos(direita,pagina.produtos);
-  if(pagina.tipo==="IMAGEM")mostrarImagem(direita,pagina.urlImagem);
+ if(paginas.length>1){
+  temporizadorPagina=setTimeout(()=>{
+   indicePagina=(indicePagina+1)%paginas.length;
+   mostrarPagina();
+  },p.duracao*1000);
+ }
+}
 
-  if(paginas.length>1){
-    temporizadorPagina=setTimeout(()=>{
-      indicePagina=(indicePagina+1)%paginas.length;
-      mostrarPagina();
-    },Math.max(1,Number(pagina.duracao)||30)*1000);
+function mostrarPrecos(el){
+ el.replaceChildren();
+ const pagina=document.createElement("div");
+ pagina.className="pagina";
+ const titulo=document.createElement("div");
+ titulo.className="titulo";
+ titulo.textContent="MENU";
+ pagina.appendChild(titulo);
+
+ const categorias=new Map();
+ for(const p of dados.produtos){
+  const cat=p.categoria||"OUTROS";
+  if(!categorias.has(cat))categorias.set(cat,[]);
+  categorias.get(cat).push(p);
+ }
+ for(const [cat,produtos] of categorias){
+  const h=document.createElement("div");
+  h.className="categoria";
+  h.textContent=cat;
+  pagina.appendChild(h);
+  for(const p of produtos){
+   const linha=document.createElement("div");
+   linha.className="produto-linha";
+   const nome=document.createElement("span");
+   nome.textContent=p.produto;
+   const preco=document.createElement("span");
+   preco.className="preco";
+   preco.textContent=moeda(p.preco);
+   linha.append(nome,preco);
+   pagina.appendChild(linha);
   }
+ }
+ el.appendChild(pagina);
 }
 
-function mostrarPrecos(elemento){
-  elemento.replaceChildren();
+function mostrarQuatro(el,produtos){
+ el.replaceChildren();
+ const pagina=document.createElement("div");
+ pagina.className="pagina";
+ const grelha=document.createElement("div");
+ grelha.className="grelha";
+ for(const p of produtos){
+  const cartao=document.createElement("div");
+  cartao.className="cartao";
+  const img=document.createElement("img");
+  img.src=urlSegura(p.urlImagem);
+  img.alt=p.nome||"Produto";
+  const info=document.createElement("div");
+  info.className="cartao-info";
+  const nome=document.createElement("div");
+  nome.className="cartao-nome";
+  nome.textContent=p.nome||"";
+  const preco=document.createElement("div");
+  preco.className="cartao-preco";
+  preco.textContent=moeda(p.preco);
+  info.append(nome,preco);
+  cartao.append(img,info);
+  grelha.appendChild(cartao);
+ }
+ pagina.appendChild(grelha);
+ el.appendChild(pagina);
+}
 
-  const pagina=document.createElement("div");
-  pagina.className="pagina";
+function mostrarImagem(el,url){
+ el.replaceChildren();
+ const pagina=document.createElement("div");
+ pagina.className="pagina";
+ const img=document.createElement("img");
+ img.className="imagem-completa";
+ img.src=urlSegura(url);
+ img.alt="Menu";
+ pagina.appendChild(img);
+ el.appendChild(pagina);
+}
 
-  const titulo=document.createElement("div");
-  titulo.className="titulo";
-  titulo.textContent="MENU";
-  pagina.appendChild(titulo);
-
-  const categorias=new Map();
-
-  for(const produto of dados.produtos){
-    const categoria=produto.categoria||"OUTROS";
-    if(!categorias.has(categoria))categorias.set(categoria,[]);
-    categorias.get(categoria).push(produto);
+function youtubeId(url){
+ try{
+  const u=new URL(url);
+  const host=u.hostname.replace(/^www\./,"");
+  if(host==="youtu.be")return u.pathname.split("/")[1]||"";
+  if(["youtube.com","m.youtube.com","youtube-nocookie.com"].includes(host)){
+   if(u.pathname==="/watch")return u.searchParams.get("v")||"";
+   const partes=u.pathname.split("/");
+   if(["embed","shorts","live"].includes(partes[1]))return partes[2]||"";
   }
-
-  for(const [categoria,produtos] of categorias){
-    const cabecalho=document.createElement("div");
-    cabecalho.className="categoria";
-    cabecalho.textContent=categoria;
-    pagina.appendChild(cabecalho);
-
-    for(const produto of produtos){
-      const linha=document.createElement("div");
-      linha.className="produto-linha";
-
-      const nome=document.createElement("span");
-      nome.textContent=produto.produto;
-
-      const preco=document.createElement("span");
-      preco.className="preco";
-      preco.textContent=moeda(produto.preco);
-
-      linha.append(nome,preco);
-      pagina.appendChild(linha);
-    }
-  }
-
-  elemento.appendChild(pagina);
+ }catch{}
+ return "";
 }
 
-function mostrarQuatroProdutos(elemento,produtos){
-  elemento.replaceChildren();
-
-  const pagina=document.createElement("div");
-  pagina.className="pagina";
-
-  const grelha=document.createElement("div");
-  grelha.className="grelha";
-
-  for(const produto of produtos){
-    const cartao=document.createElement("div");
-    cartao.className="cartao";
-
-    const imagem=document.createElement("img");
-    imagem.src=urlSegura(produto.urlImagem)||"";
-    imagem.alt=produto.nome||"Produto";
-
-    const info=document.createElement("div");
-    info.className="cartao-info";
-
-    const nome=document.createElement("div");
-    nome.className="cartao-nome";
-    nome.textContent=produto.nome||"";
-
-    const preco=document.createElement("div");
-    preco.className="cartao-preco";
-    preco.textContent=moeda(produto.preco);
-
-    info.append(nome,preco);
-    cartao.append(imagem,info);
-    grelha.appendChild(cartao);
-  }
-
-  pagina.appendChild(grelha);
-  elemento.appendChild(pagina);
-}
-
-function mostrarImagem(elemento,url){
-  elemento.replaceChildren();
-
-  const pagina=document.createElement("div");
-  pagina.className="pagina";
-
-  const imagem=document.createElement("img");
-  imagem.className="imagem-completa";
-  imagem.src=urlSegura(url)||"";
-  imagem.alt="Menu";
-
-  pagina.appendChild(imagem);
-  elemento.appendChild(pagina);
-}
-
-function extrairYoutube(url){
-  try{
-    const u=new URL(url);
-    const host=u.hostname.replace(/^www\./,"");
-
-    if(host==="youtu.be")return u.pathname.split("/")[1]||"";
-
-    if(["youtube.com","m.youtube.com","youtube-nocookie.com"].includes(host)){
-      if(u.pathname==="/watch")return u.searchParams.get("v")||"";
-      const partes=u.pathname.split("/");
-      if(["embed","shorts","live"].includes(partes[1]))return partes[2]||"";
-    }
-  }catch{}
-  return "";
-}
-
-function anunciosValidos(){
-  return dados.publicidade.filter(item=>urlSegura(item.urlVideo));
+function anuncios(){
+ return dados.publicidade.filter(x=>urlSegura(x.urlVideo));
 }
 
 function atualizarPublicidade(){
-  const anuncios=anunciosValidos();
-  const assinatura=JSON.stringify(anuncios);
-  if(assinatura===assinaturaPublicidade)return;
+ const lista=anuncios();
+ const assinatura=JSON.stringify(lista);
+ if(assinatura===assinaturaPublicidade)return;
+ assinaturaPublicidade=assinatura;
 
-  assinaturaPublicidade=assinatura;
-
-  if(!anuncios.length){
-    destruirPlayer();
-    videoAtual="";
-    document.getElementById("video-container").replaceChildren();
-    return;
-  }
-
-  const indice=anuncios.findIndex(item=>item.urlVideo===videoAtual);
-
-  if(indice>=0){
-    indiceAnuncio=indice;
-    return;
-  }
-
-  indiceAnuncio=0;
-  mostrarAnuncio();
+ if(!lista.length){
+  destruirPlayer();
+  videoAtual="";
+  document.getElementById("video-container").replaceChildren();
+  return;
+ }
+ const indice=lista.findIndex(x=>x.urlVideo===videoAtual);
+ if(indice>=0){indiceAnuncio=indice;return}
+ indiceAnuncio=0;
+ mostrarAnuncio();
 }
 
 function destruirPlayer(){
-  if(playerYouTube){
-    try{playerYouTube.destroy()}catch{}
-  }
-  playerYouTube=null;
+ if(playerYouTube){
+  try{playerYouTube.destroy()}catch{}
+ }
+ playerYouTube=null;
 }
 
 function proximoAnuncio(){
-  const anuncios=anunciosValidos();
-  if(!anuncios.length)return;
-
-  indiceAnuncio=(indiceAnuncio+1)%anuncios.length;
-  mostrarAnuncio();
+ const lista=anuncios();
+ if(!lista.length)return;
+ indiceAnuncio=(indiceAnuncio+1)%lista.length;
+ mostrarAnuncio();
 }
 
 function mostrarAnuncio(){
-  const anuncios=anunciosValidos();
-  if(!anuncios.length)return;
+ const lista=anuncios();
+ if(!lista.length)return;
+ const url=urlSegura(lista[indiceAnuncio].urlVideo);
+ if(!url)return;
 
-  const anuncio=anuncios[indiceAnuncio];
-  const url=urlSegura(anuncio.urlVideo);
-  if(!url)return;
+ destruirPlayer();
+ videoAtual=url;
+ const container=document.getElementById("video-container");
+ container.replaceChildren();
+ const id=youtubeId(url);
 
-  destruirPlayer();
-  videoAtual=url;
-
-  const container=document.getElementById("video-container");
-  container.replaceChildren();
-
-  const youtubeId=extrairYoutube(url);
-
-  if(youtubeId){
-    const alvo=document.createElement("div");
-    alvo.id="youtube-player";
-    container.appendChild(alvo);
-
-    if(apiYouTubePronta && window.YT?.Player){
-      iniciarYoutube(youtubeId);
-    }else{
-      aguardandoYouTube=true;
-      carregarApiYoutube();
-    }
-    return;
+ if(id){
+  const alvo=document.createElement("div");
+  alvo.id="youtube-player";
+  container.appendChild(alvo);
+  if(youtubePronto&&window.YT?.Player)iniciarYoutube(id);
+  else{
+   aguardaYoutube=true;
+   carregarYoutube();
   }
+  return;
+ }
 
-  const video=document.createElement("video");
-  video.src=url;
-  video.autoplay=true;
-  video.muted=true;
-  video.playsInline=true;
-  video.controls=false;
-
-  video.addEventListener("ended",()=>{
-    if(anunciosValidos().length===1){
-      video.currentTime=0;
-      video.play().catch(()=>{});
-    }else{
-      proximoAnuncio();
-    }
-  });
-
-  container.appendChild(video);
-  video.play().catch(()=>{});
+ const video=document.createElement("video");
+ video.src=url;
+ video.autoplay=true;
+ video.muted=true;
+ video.playsInline=true;
+ video.addEventListener("ended",()=>{
+  if(anuncios().length===1){
+   video.currentTime=0;
+   video.play().catch(()=>{});
+  }else proximoAnuncio();
+ });
+ container.appendChild(video);
+ video.play().catch(()=>{});
 }
 
-function carregarApiYoutube(){
-  if(scriptYoutubeAdicionado)return;
-  scriptYoutubeAdicionado=true;
-
-  const script=document.createElement("script");
-  script.src="https://www.youtube.com/iframe_api";
-  document.head.appendChild(script);
+function carregarYoutube(){
+ if(youtubeScript)return;
+ youtubeScript=true;
+ const s=document.createElement("script");
+ s.src="https://www.youtube.com/iframe_api";
+ document.head.appendChild(s);
 }
 
 window.onYouTubeIframeAPIReady=function(){
-  apiYouTubePronta=true;
-
-  if(aguardandoYouTube){
-    aguardandoYouTube=false;
-    const id=extrairYoutube(videoAtual);
-    if(id)iniciarYoutube(id);
-  }
+ youtubePronto=true;
+ if(aguardaYoutube){
+  aguardaYoutube=false;
+  const id=youtubeId(videoAtual);
+  if(id)iniciarYoutube(id);
+ }
 };
 
 function iniciarYoutube(id){
-  if(!window.YT?.Player)return;
-
-  playerYouTube=new YT.Player("youtube-player",{
-    videoId:id,
-    width:"100%",
-    height:"100%",
-    playerVars:{
-      autoplay:1,
-      mute:1,
-      controls:0,
-      playsinline:1,
-      rel:0,
-      origin:location.origin
-    },
-    events:{
-      onReady:evento=>{
-        evento.target.mute();
-        evento.target.playVideo();
-      },
-      onStateChange:evento=>{
-        if(evento.data===YT.PlayerState.ENDED){
-          if(anunciosValidos().length===1){
-            evento.target.seekTo(0);
-            evento.target.playVideo();
-          }else{
-            proximoAnuncio();
-          }
-        }
-      }
+ if(!window.YT?.Player)return;
+ playerYouTube=new YT.Player("youtube-player",{
+  videoId:id,
+  width:"100%",
+  height:"100%",
+  playerVars:{
+   autoplay:1,mute:1,controls:0,playsinline:1,rel:0,
+   origin:location.origin
+  },
+  events:{
+   onReady:e=>{e.target.mute();e.target.playVideo()},
+   onStateChange:e=>{
+    if(e.data===YT.PlayerState.ENDED){
+     if(anuncios().length===1){
+      e.target.seekTo(0);
+      e.target.playVideo();
+     }else proximoAnuncio();
     }
-  });
+   }
+  }
+ });
 }
 
 carregarDados();
