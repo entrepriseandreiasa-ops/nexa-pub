@@ -9,10 +9,13 @@
 *{box-sizing:border-box}
 html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#080808;color:#fff;font-family:Arial,sans-serif}
 #ecra{display:flex;width:100vw;height:calc(100dvh - 55px)}
-#publicidade{width:38%;height:100%;background:#000;display:flex;align-items:center;justify-content:center;overflow:hidden}
+#esquerda{width:40%;height:100%;display:flex;flex-direction:column;min-width:0;background:#000}
+#publicidade{width:100%;height:60%;background:#000;display:flex;align-items:center;justify-content:center;overflow:hidden}
 #video-container{width:100%;max-height:100%;aspect-ratio:16/9;position:relative}
 #video-container iframe,#video-container video{position:absolute;inset:0;width:100%;height:100%;border:0;object-fit:contain}
-#direita{width:62%;height:100%;background:#111;overflow:hidden}
+#imagens-publicidade{width:100%;height:40%;background:#141414;overflow:hidden;position:relative}
+#imagem-anuncio{width:100%;height:100%;object-fit:contain;display:block;transition:opacity .65s ease}
+#direita{width:60%;height:100%;background:#111;overflow:hidden}
 .pagina{width:100%;height:100%;padding:25px;overflow:hidden}
 .titulo{color:#ffd400;text-align:center;font-size:clamp(24px,2.5vw,48px);font-weight:bold;margin-bottom:20px}
 .categoria{font-size:clamp(19px,1.8vw,32px);color:#ffd400;font-weight:bold;margin:17px 0 8px;border-bottom:1px solid #555;padding-bottom:6px}
@@ -29,18 +32,21 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#080808;col
 #texto-rodape{display:inline-block;padding-left:100vw;font-size:27px;font-weight:bold;animation:deslocar 35s linear infinite}
 @keyframes deslocar{to{transform:translateX(-100%)}}
 body.modo-publicidade #ecra{height:100dvh}
-body.modo-publicidade #publicidade{width:100%}
+body.modo-publicidade #esquerda{width:100%}
+body.modo-publicidade #publicidade{height:100%}
+body.modo-publicidade #imagens-publicidade{display:none}
 body.modo-publicidade #direita,body.modo-publicidade #rodape{display:none}
-body.modo-menu #publicidade{display:none}
+body.modo-menu #esquerda{display:none}
 body.modo-menu #direita{width:100%}
 </style>
 </head>
 <body>
 
 <div id="ecra">
-  <section id="publicidade">
-    <div id="video-container"></div>
-  </section>
+  <div id="esquerda">
+    <section id="publicidade"><div id="video-container"></div></section>
+    <section id="imagens-publicidade"><img id="imagem-anuncio" alt="Publicidade"></section>
+  </div>
   <section id="direita"></section>
 </div>
 
@@ -49,14 +55,19 @@ body.modo-menu #direita{width:100%}
 </div>
 
 <script>
-const API="https://script.google.com/macros/s/AKfycbyUpVKN2nepSUrtBXq8DbiAJYQ3N2BbdJdJaODxq6L_ku0j_36tVIKTtcijtSYdzoR9/exec";
+const API="https://script.google.com/macros/s/AKfycbxzDxsycqWPJgB459RzvBVx4o4ywlxk55leVEmh9VHbPdpnBekaSBSyVdyIWnBO7R5v/exec";
 
 const canal=(new URLSearchParams(location.search).get("canal")||"completo").toLowerCase();
 
 if(canal==="publicidade")document.body.classList.add("modo-publicidade");
 if(canal==="menu")document.body.classList.add("modo-menu");
 
-let dados={produtos:[],rodape:[],publicidade:[],ecraDireito:[]};
+let dados={produtos:[],rodape:[],publicidade:[],ecraDireito:[],configuracao:{},imagensPublicidade:[]};
+let imagensAtuais=[];
+let assinaturaImagens="";
+let indiceImagem=0;
+let temporizadorImagem=null;
+let inicioImagem=0;
 let assinaturaRodape="";
 let assinaturaPaginas="";
 let assinaturaPrecos="";
@@ -116,9 +127,13 @@ function carregarDados(){
       produtos:Array.isArray(resposta.produtos)?resposta.produtos:[],
       rodape:Array.isArray(resposta.rodape)?resposta.rodape:[],
       publicidade:Array.isArray(resposta.publicidade)?resposta.publicidade:[],
-      ecraDireito:Array.isArray(resposta.ecraDireito)?resposta.ecraDireito:[]
+      ecraDireito:Array.isArray(resposta.ecraDireito)?resposta.ecraDireito:[],
+      configuracao:resposta.configuracao||{},
+      imagensPublicidade:Array.isArray(resposta.imagensPublicidade)?resposta.imagensPublicidade:[]
     };
 
+    aplicarConfiguracao();
+    atualizarImagens();
     atualizarRodape();
     atualizarDireita();
     atualizarPublicidade();
@@ -127,6 +142,68 @@ function carregarDados(){
   script.onerror=limpar;
   script.src=API+"?callback="+encodeURIComponent(nome)+"&t="+Date.now();
   document.head.appendChild(script);
+}
+
+function configuracaoNumero(chave, padrao, minimo, maximo){
+  const n=Number(dados.configuracao[chave]);
+  return Number.isFinite(n)&&n>=minimo&&n<=maximo?n:padrao;
+}
+
+function aplicarConfiguracao(){
+  const esquerda=configuracaoNumero("LARGURA_ESQUERDA",40,20,80);
+  const video=configuracaoNumero("ALTURA_VIDEO",60,20,90);
+  document.getElementById("esquerda").style.width=esquerda+"%";
+  document.getElementById("direita").style.width=canal==="menu"?"100%":(100-esquerda)+"%";
+  document.getElementById("publicidade").style.height=video+"%";
+  document.getElementById("imagens-publicidade").style.height=(100-video)+"%";
+  const rodape=document.getElementById("rodape");
+  rodape.style.backgroundColor=String(dados.configuracao.COR_RODAPE||"#FFD700");
+  rodape.style.color=String(dados.configuracao.COR_TEXTO_RODAPE||"#000000");
+  const velocidade=configuracaoNumero("VELOCIDADE_RODAPE",60,5,300);
+  document.getElementById("texto-rodape").style.animationDuration=velocidade+"s";
+  const som=String(dados.configuracao.SOM_VIDEO||"NÃO").toUpperCase()==="SIM";
+  const videoEl=document.querySelector("#video-container video");
+  if(videoEl)videoEl.muted=!som;
+  if(playerYouTube){try{som?playerYouTube.unMute():playerYouTube.mute()}catch(e){}}
+}
+
+function atualizarImagens(){
+  const lista=dados.imagensPublicidade.filter(x=>urlSegura(x.urlImagem));
+  const assinatura=JSON.stringify(lista);
+  if(assinatura===assinaturaImagens)return;
+  assinaturaImagens=assinatura;
+  const idAtual=imagensAtuais[indiceImagem]?.id;
+  imagensAtuais=lista;
+  const indice=lista.findIndex(x=>x.id===idAtual);
+  indiceImagem=indice>=0?indice:0;
+  if(!lista.length){
+    clearTimeout(temporizadorImagem);
+    document.getElementById("imagem-anuncio").removeAttribute("src");
+    return;
+  }
+  mostrarImagemPublicidade(indice>=0);
+}
+
+function mostrarImagemPublicidade(manterTempo=false){
+  clearTimeout(temporizadorImagem);
+  if(!imagensAtuais.length)return;
+  if(!manterTempo||!inicioImagem)inicioImagem=Date.now();
+  const item=imagensAtuais[indiceImagem];
+  const img=document.getElementById("imagem-anuncio");
+  if(img.getAttribute("src")!==item.urlImagem){
+    img.style.opacity="0";
+    const url=item.urlImagem;
+    const nova=new Image();
+    nova.onload=()=>{if(imagensAtuais[indiceImagem]?.urlImagem===url){img.src=url;img.style.opacity="1"}};
+    nova.onerror=()=>{if(imagensAtuais[indiceImagem]?.urlImagem===url){img.src=url;img.style.opacity="1"}};
+    nova.src=url;
+  }
+  const duracao=Number(item.duracao)||configuracaoNumero("DURACAO_IMAGENS",10,1,3600);
+  const restante=Math.max(100,duracao*1000-(Date.now()-inicioImagem));
+  temporizadorImagem=setTimeout(()=>{
+    indiceImagem=(indiceImagem+1)%imagensAtuais.length;
+    mostrarImagemPublicidade(false);
+  },restante);
 }
 
 function atualizarRodape(){
@@ -446,7 +523,7 @@ function mostrarAnuncio(){
   const video=document.createElement("video");
   video.src=url;
   video.autoplay=true;
-  video.muted=true;
+  video.muted=String(dados.configuracao.SOM_VIDEO||"NÃO").toUpperCase()!=="SIM";
   video.playsInline=true;
 
   video.addEventListener("ended",()=>{
